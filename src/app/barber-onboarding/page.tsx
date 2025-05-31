@@ -133,15 +133,15 @@ export default function BarberOnboarding() {
     };
 
     // Only show the account creation form (step 2) if barbershop is set
-    if (step === 2 && barbershop) {
+    if (Number(step) === 2 && barbershop) {
         return (
             <div className="min-h-screen bg-gray-900 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-md w-full space-y-8">
                     <div>
                         <h2 className="mt-6 text-center text-3xl font-extrabold text-white">
-                            {step === 1 ? 'Join a Barbershop' : 'Create Your Account'}
+                            {Number(step) === 1 ? 'Join a Barbershop' : 'Create Your Account'}
                         </h2>
-                        {step === 2 && barbershop && (
+                        {Number(step) === 2 && barbershop && (
                             <div className="mt-4 bg-gray-800 rounded-lg p-4">
                                 <div className="flex items-center">
                                     {barbershop.logo_url && (
