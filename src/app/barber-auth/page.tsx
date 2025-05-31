@@ -9,7 +9,7 @@ function isValidEmail(email: string) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-export default function BarberAuthPage() {
+function BarberAuthContent() {
     const [mode, setMode] = useState<'signin' | 'signup'>('signup');
     const [mounted, setMounted] = useState(false);
     const router = useRouter();
@@ -22,70 +22,15 @@ export default function BarberAuthPage() {
 
     if (!mounted) {
         return (
-            <Suspense fallback={<div>Loading...</div>}>
-                <div className="min-h-screen flex items-center justify-center">
-                    <div className="text-white">Loading...</div>
-                </div>
-            </Suspense>
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="text-white">Loading...</div>
+            </div>
         );
     }
 
     if (isBarbershopOwner) {
         // Modern design for barbershop admin
         return (
-            <Suspense fallback={<div>Loading...</div>}>
-                <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-yellow-100 to-yellow-200">
-                    <div className="w-full max-w-md rounded-3xl shadow-2xl bg-white p-8 relative">
-                        <div className="flex flex-col items-center mb-8">
-                            <div className="mb-4">
-                                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <rect width="40" height="40" rx="12" fill="#FFD600" />
-                                    <rect x="8" y="12" width="24" height="4" rx="2" fill="white" />
-                                    <rect x="8" y="24" width="24" height="4" rx="2" fill="white" />
-                                </svg>
-                            </div>
-                            <div className="flex w-full mb-6">
-                                <button
-                                    className={`flex-1 py-2 rounded-l-xl font-semibold text-lg transition-colors duration-200 ${mode === 'signup' ? 'bg-yellow-400 text-black' : 'bg-gray-100 text-gray-500'}`}
-                                    onClick={() => setMode('signup')}
-                                >
-                                    Sign Up
-                                </button>
-                                <button
-                                    className={`flex-1 py-2 rounded-r-xl font-semibold text-lg transition-colors duration-200 ${mode === 'signin' ? 'bg-yellow-400 text-black' : 'bg-gray-100 text-gray-500'}`}
-                                    onClick={() => setMode('signin')}
-                                >
-                                    Login
-                                </button>
-                            </div>
-                        </div>
-                        {mode === 'signup' ? (
-                            <BarbershopOwnerSignUpForm onSwitch={() => setMode('signin')} />
-                        ) : (
-                            <BarbershopOwnerSignInForm onSwitch={() => setMode('signup')} />
-                        )}
-                        <div className="flex items-center my-6">
-                            <div className="flex-1 h-px bg-gray-200" />
-                            <span className="mx-4 text-gray-400 text-sm">or</span>
-                            <div className="flex-1 h-px bg-gray-200" />
-                        </div>
-                        <div className="flex justify-center gap-6 mb-4">
-                            <button className="bg-white shadow-md rounded-full p-3 hover:bg-gray-100 transition"><FaGoogle className="text-xl text-yellow-500" /></button>
-                            <button className="bg-white shadow-md rounded-full p-3 hover:bg-gray-100 transition"><FaFacebook className="text-xl text-blue-600" /></button>
-                            <button className="bg-white shadow-md rounded-full p-3 hover:bg-gray-100 transition"><FaTwitter className="text-xl text-blue-400" /></button>
-                        </div>
-                        <div className="text-center text-gray-400 text-xs mt-2">
-                            By Signing Up, you agree to our <span className="underline cursor-pointer">Terms & Privacy Policy</span>
-                        </div>
-                    </div>
-                </div>
-            </Suspense>
-        );
-    }
-
-    // Default (barber) design remains unchanged
-    return (
-        <Suspense fallback={<div>Loading...</div>}>
             <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-yellow-100 to-yellow-200">
                 <div className="w-full max-w-md rounded-3xl shadow-2xl bg-white p-8 relative">
                     <div className="flex flex-col items-center mb-8">
@@ -112,9 +57,9 @@ export default function BarberAuthPage() {
                         </div>
                     </div>
                     {mode === 'signup' ? (
-                        <BarberSignUpForm onSwitch={() => setMode('signin')} />
+                        <BarbershopOwnerSignUpForm onSwitch={() => setMode('signin')} />
                     ) : (
-                        <BarberSignInForm onSwitch={() => setMode('signup')} />
+                        <BarbershopOwnerSignInForm onSwitch={() => setMode('signup')} />
                     )}
                     <div className="flex items-center my-6">
                         <div className="flex-1 h-px bg-gray-200" />
@@ -131,6 +76,63 @@ export default function BarberAuthPage() {
                     </div>
                 </div>
             </div>
+        );
+    }
+
+    // Default (barber) design remains unchanged
+    return (
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-yellow-100 to-yellow-200">
+            <div className="w-full max-w-md rounded-3xl shadow-2xl bg-white p-8 relative">
+                <div className="flex flex-col items-center mb-8">
+                    <div className="mb-4">
+                        <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect width="40" height="40" rx="12" fill="#FFD600" />
+                            <rect x="8" y="12" width="24" height="4" rx="2" fill="white" />
+                            <rect x="8" y="24" width="24" height="4" rx="2" fill="white" />
+                        </svg>
+                    </div>
+                    <div className="flex w-full mb-6">
+                        <button
+                            className={`flex-1 py-2 rounded-l-xl font-semibold text-lg transition-colors duration-200 ${mode === 'signup' ? 'bg-yellow-400 text-black' : 'bg-gray-100 text-gray-500'}`}
+                            onClick={() => setMode('signup')}
+                        >
+                            Sign Up
+                        </button>
+                        <button
+                            className={`flex-1 py-2 rounded-r-xl font-semibold text-lg transition-colors duration-200 ${mode === 'signin' ? 'bg-yellow-400 text-black' : 'bg-gray-100 text-gray-500'}`}
+                            onClick={() => setMode('signin')}
+                        >
+                            Login
+                        </button>
+                    </div>
+                </div>
+                {mode === 'signup' ? (
+                    <BarberSignUpForm onSwitch={() => setMode('signin')} />
+                ) : (
+                    <BarberSignInForm onSwitch={() => setMode('signup')} />
+                )}
+                <div className="flex items-center my-6">
+                    <div className="flex-1 h-px bg-gray-200" />
+                    <span className="mx-4 text-gray-400 text-sm">or</span>
+                    <div className="flex-1 h-px bg-gray-200" />
+                </div>
+                <div className="flex justify-center gap-6 mb-4">
+                    <button className="bg-white shadow-md rounded-full p-3 hover:bg-gray-100 transition"><FaGoogle className="text-xl text-yellow-500" /></button>
+                    <button className="bg-white shadow-md rounded-full p-3 hover:bg-gray-100 transition"><FaFacebook className="text-xl text-blue-600" /></button>
+                    <button className="bg-white shadow-md rounded-full p-3 hover:bg-gray-100 transition"><FaTwitter className="text-xl text-blue-400" /></button>
+                </div>
+                <div className="text-center text-gray-400 text-xs mt-2">
+                    By Signing Up, you agree to our <span className="underline cursor-pointer">Terms & Privacy Policy</span>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+export default function BarberAuthPage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <BarberAuthContent />
         </Suspense>
     );
 }
