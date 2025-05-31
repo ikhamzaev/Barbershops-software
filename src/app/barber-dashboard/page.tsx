@@ -43,15 +43,7 @@ interface Barber {
     };
 }
 
-export default function BarberDashboardRedirect() {
-    const router = useRouter();
-    useEffect(() => {
-        router.replace('/barber-dashboard/calendar');
-    }, [router]);
-    return null;
-}
-
-export function BarberDashboard() {
+function BarberDashboard() {
     const [barber, setBarber] = useState<Barber | null>(null);
     const [appointments, setAppointments] = useState<Appointment[]>([]);
     const [loading, setLoading] = useState(true);
@@ -122,61 +114,12 @@ export function BarberDashboard() {
 
                 console.log('Fetched appointments:', appointmentsData);
                 setAppointments(appointmentsData || []);
-
-                // Subscribe to real-time updates
-                const channel = supabase
-                    .channel('appointments')
-                    .on(
-                        'postgres_changes',
-                        {
-                            event: '*',
-                            schema: 'public',
-                            table: 'appointments',
-                            filter: `barber_id=eq.${barberData.id}`
-                        },
-                        async (payload) => {
-                            console.log('Real-time update received:', payload);
-                            // Refetch appointments when there's a change
-                            const { data: updatedAppointments, error: updateError } = await supabase
-                                .from('appointments')
-                                .select(`
-                                    *,
-                                    client:client_id (
-                                        id,
-                                        name,
-                                        phone
-                                    ),
-                                    services:service_id (
-                                        id,
-                                        name,
-                                        price
-                                    )
-                                `)
-                                .eq('barber_id', barberData.id)
-                                .eq('appointment_date', today)
-                                .order('appointment_time');
-
-                            if (updateError) {
-                                console.error('Error fetching updated appointments:', updateError);
-                                return;
-                            }
-
-                            console.log('Updated appointments:', updatedAppointments);
-                            setAppointments(updatedAppointments || []);
-                        }
-                    )
-                    .subscribe();
-
-                return () => {
-                    supabase.removeChannel(channel);
-                };
             } catch (error: any) {
                 setError(error.message);
             } finally {
                 setLoading(false);
             }
         };
-
         fetchBarberData();
     }, [router, supabase]);
 
@@ -241,4 +184,6 @@ export function BarberDashboard() {
             </div>
         </div>
     );
-} 
+}
+
+export default BarberDashboard; 
