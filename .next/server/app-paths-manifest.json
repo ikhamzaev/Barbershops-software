@@ -1,0 +1,9 @@
+{
+  "/_not-found/page": "app/_not-found/page.js",
+  "/barbershop-dashboard/page": "app/barbershop-dashboard/page.js",
+  "/barbershop-dashboard/barbers/page": "app/barbershop-dashboard/barbers/page.js",
+  "/barber-auth/page": "app/barber-auth/page.js",
+  "/barbershop-dashboard/settings/page": "app/barbershop-dashboard/settings/page.js",
+  "/client-dashboard/messages/page": "app/client-dashboard/messages/page.js",
+  "/client-dashboard/page": "app/client-dashboard/page.js"
+}

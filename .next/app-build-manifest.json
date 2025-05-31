@@ -1,0 +1,127 @@
+{
+  "pages": {
+    "/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/page.js"
+    ],
+    "/layout": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/layout.css",
+      "static/chunks/app/layout.js"
+    ],
+    "/barber-auth/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/barber-auth/page.js"
+    ],
+    "/barber-dashboard/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/barber-dashboard/page.js"
+    ],
+    "/barber-dashboard/calendar/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/barber-dashboard/calendar/page.js"
+    ],
+    "/barber-dashboard/clients/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/barber-dashboard/clients/page.js"
+    ],
+    "/barber-dashboard/services/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/barber-dashboard/services/page.js"
+    ],
+    "/barber-dashboard/settings/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/barber-dashboard/settings/page.js"
+    ],
+    "/barber-dashboard/chat/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/barber-dashboard/chat/page.js"
+    ],
+    "/client-auth/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/client-auth/page.js"
+    ],
+    "/client-dashboard/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/client-dashboard/page.js"
+    ],
+    "/client-dashboard/layout": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/client-dashboard/layout.js"
+    ],
+    "/client-dashboard/error": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/client-dashboard/error.js"
+    ],
+    "/client-dashboard/appointments/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/client-dashboard/appointments/page.js"
+    ],
+    "/client-dashboard/favorites/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/client-dashboard/favorites/page.js"
+    ],
+    "/client-dashboard/messages/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/client-dashboard/messages/page.js"
+    ],
+    "/client-dashboard/barbershop/[id]/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/client-dashboard/barbershop/[id]/page.js"
+    ],
+    "/client-dashboard/barbershop/[id]/schedule/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/client-dashboard/barbershop/[id]/schedule/page.css",
+      "static/chunks/app/client-dashboard/barbershop/[id]/schedule/page.js"
+    ],
+    "/client-dashboard/booking-success/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/client-dashboard/booking-success/page.js"
+    ],
+    "/barbershop-onboarding/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/barbershop-onboarding/page.js"
+    ],
+    "/barbershop-dashboard/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/barbershop-dashboard/page.css",
+      "static/chunks/app/barbershop-dashboard/page.js"
+    ],
+    "/barbershop-dashboard/barbers/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/barbershop-dashboard/barbers/page.js"
+    ],
+    "/barbershop-dashboard/settings/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/barbershop-dashboard/settings/page.js"
+    ],
+    "/_not-found/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/_not-found/page.js"
+    ]
+  }
+}

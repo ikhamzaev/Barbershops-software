@@ -1,0 +1,166 @@
+Barbershop App: Troubleshooting & Lessons Learned
+
+1. Authentication & Invite Flow Issues
+--------------------------------------
+Problem:
+- After inviting a barber and signing up with the invite code, the barber's info was correctly stored in users and barbers tables, but the dashboard said "No barber profile found" or "user is not defined."
+- Everything looked correct: IDs matched, invite code logic worked, data was in the tables.
+
+Root Cause:
+- Row Level Security (RLS) policy missing. Even though the data existed, Supabase RLS was blocking the SELECT query, so the dashboard couldn't "see" the barber row for the logged-in user.
+
+Solution:
+- Add a SELECT RLS policy:
+  CREATE POLICY "Barber can select own row"
+  ON barbers
+  FOR SELECT
+  USING (user_id = auth.uid());
+- Or, temporarily disable RLS for debugging (not recommended for production).
+
+Lesson:
+- Always check RLS policies when you get "no data found" errors, even if the data is in the table and IDs match.
+
+2. Supabase Auth Session Issues
+------------------------------
+Problem:
+- After sign-up or sign-in, user was null or "user is not defined" in the code, causing errors when trying to access user.id.
+
+Root Cause:
+- Session not established yet. Supabase Auth may take a moment to set the session after sign-in/sign-up, especially in SSR/Next.js environments.
+
+Solution:
+- Always check for user before using user.id:
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+      setError("Authentication failed. Please try again.");
+      return;
+  }
+- Add debug logs to verify the user object after sign-in.
+
+Lesson:
+- Never assume user is immediately available after sign-in/sign-up. Always check and handle the null case.
+
+3. Database Schema Mismatches
+-----------------------------
+Problem:
+- Errors like "column barbers.phone does not exist", "column barbers.status does not exist", or "column appointments.start_time does not exist".
+
+Root Cause:
+- Code expected columns that didn't exist in the database schema.
+
+Solution:
+- Remove or update code to match the actual schema.
+- Or, add the missing columns to the database if you want to use them.
+
+Lesson:
+- Keep your code and database schema in sync. If you change the schema, update your code, and vice versa.
+
+4. Invite Code Logic
+--------------------
+Problem:
+- After using an invite code, the code disappeared from the barber_invites table.
+
+Root Cause:
+- Intended behavior. The invite code is deleted after use to prevent reuse.
+
+Solution:
+- No action needed unless you want to keep a record of used invites (add a used column or archive table).
+
+Lesson:
+- Invite codes should be one-time use. Deleting them after use is best practice.
+
+5. Appointments Table Query Errors
+----------------------------------
+Problem:
+- "column appointments.start_time does not exist"
+
+Root Cause:
+- Code was querying a non-existent column. The table had appointment_date and appointment_time instead.
+
+Solution:
+- Update code to use the correct columns:
+  .eq('appointment_date', today)
+  .order('appointment_time')
+- Or, add a start_time column if you want a single datetime field.
+
+Lesson:
+- Double-check your table columns before writing queries. Use the Table Editor or \d appointments in SQL.
+
+6. Supabase Project/Key Mismatch
+-------------------------------
+Problem:
+- Auth works, but data queries return nothing, or vice versa.
+
+Root Cause:
+- Using different Supabase projects/keys for Auth and database queries.
+
+Solution:
+- Check your .env and supabaseClient.ts to ensure you're using the correct project URL and anon key everywhere.
+
+Lesson:
+- Always use the same Supabase project for Auth and data.
+
+7. Debugging Tips That Helped
+----------------------------
+- Add lots of console.log statements to print out user objects, query results, and errors.
+- Check the browser Network tab to see the actual API requests and responses.
+- Manually inspect tables in Supabase to verify data is being inserted as expected.
+- Try manual inserts/queries in the Table Editor to isolate issues.
+
+8. Extra Common Issues & Lessons
+-------------------------------
+A. Foreign Key Constraints
+- Problem: Insert fails with a foreign key error.
+- Root Cause: Trying to insert a row with a reference to a non-existent parent row.
+- Solution: Make sure referenced rows exist before inserting.
+- Lesson: Always insert parent rows (e.g., barbershop) before child rows (e.g., barber).
+
+B. Multiple Rows Returned When Using .single()
+- Problem: "JSON object requested, multiple (or no) rows returned"
+- Root Cause: Using .single() when there are 0 or >1 rows matching the query.
+- Solution: Use .maybeSingle() or ensure only one row matches.
+- Lesson: Use .single() only when you are certain there will be exactly one row.
+
+C. Data Type Mismatches
+- Problem: Query returns no results even though data "looks" correct.
+- Root Cause: Data type mismatch (e.g., user_id is text in one table, uuid in another).
+- Solution: Ensure all related columns use the same data type.
+- Lesson: Always use uuid for IDs in Supabase/Postgres.
+
+D. Policy Not Covering All Operations
+- Problem: Can read but not insert/update/delete, or vice versa.
+- Root Cause: Policy only covers SELECT, not INSERT/UPDATE/DELETE.
+- Solution: Add policies for all needed operations.
+- Lesson: Write policies for every operation your app needs.
+
+E. Session Persistence Issues
+- Problem: User gets logged out after refresh or navigation.
+- Root Cause: Supabase client not initialized with the correct options, or cookies/session not persisted.
+- Solution: Use the recommended Supabase client setup for Next.js, and check browser storage.
+- Lesson: Test session persistence across page reloads.
+
+Summary Table
+-------------
+Problem/Symptom                        | Root Cause                        | Solution/Action                                      | Lesson Learned
+---------------------------------------|-----------------------------------|------------------------------------------------------|-------------------------------------------------
+Data exists, but "not found" error      | RLS policy missing                | Add/select RLS policy for user                       | Always check RLS when data is "invisible"       
+user is null after sign-in              | Session not set yet               | Check for user before using                          | Never assume user is available immediately      
+Column does not exist error             | Schema mismatch                   | Update code or schema to match                       | Keep code and DB schema in sync                 
+Invite code disappears after use        | Intended one-time use             | No action needed (unless you want to archive)        | Invite codes should be one-time use             
+Querying non-existent appointment field | Wrong column name in code         | Update code to use correct columns                   | Double-check table columns before querying      
+Auth works, but data queries fail       | Project/key mismatch              | Use same Supabase project for Auth and DB            | Always use correct project URL/key everywhere   
+Foreign key constraint errors           | Parent row missing                | Insert parent row first                              | Insert parent before child                      
+Multiple rows with .single()            | More than one row returned        | Use .maybeSingle() or ensure only one row matches    | Use .single() only for unique queries           
+Data type mismatch                      | UUID vs text, etc.                | Use same data type for related columns               | Always use uuid for IDs                         
+Policy not covering all ops             | Only SELECT, not INSERT/UPDATE    | Add policies for all needed operations               | Write policies for every operation              
+Session persistence issues              | Client/cookie misconfig           | Use correct client setup, check browser storage      | Test session persistence                        
+
+Final Advice
+------------
+- Document your RLS policies and keep them up to date.
+- Always check for nulls and errors after async calls.
+- Keep your schema and code in sync.
+- Use debug logs and the Supabase Table Editor liberally.
+- If something "should work" but doesn't, check RLS and data types first!
+- Test your flows from scratch after major changes (delete all test data and start fresh).
+- Use the browser's Network tab to see what's really happening with your API calls. 
