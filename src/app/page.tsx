@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { FaUser, FaUserTie, FaStore } from 'react-icons/fa';
+import TrimmerViewer from '@/components/TrimmerViewer';
 
 export default function Home() {
     const [isNavigating, setIsNavigating] = useState(false);
@@ -39,7 +40,12 @@ export default function Home() {
 
     return (
         <div className="min-h-screen w-full relative flex items-center justify-center">
+            {/* 3D Animation Background */}
+            <div className="absolute inset-0 z-0 pointer-events-none">
+                <TrimmerViewer />
+            </div>
             {/* Background Image */}
+            {/**
             <div className="absolute inset-0 z-0">
                 <Image
                     src="/images/barbershop-bg.jpg"
@@ -50,6 +56,7 @@ export default function Home() {
                 />
                 <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/60 to-black/80" />
             </div>
+            **/}
 
             {/* Logo */}
             <div className="absolute top-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center">
