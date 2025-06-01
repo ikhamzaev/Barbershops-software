@@ -40,12 +40,7 @@ export default function Home() {
 
     return (
         <div className="min-h-screen w-full relative flex items-center justify-center">
-            {/* 3D Animation Background */}
-            <div className="absolute inset-0 z-0 pointer-events-none">
-                <TrimmerViewer />
-            </div>
             {/* Background Image */}
-            {/**
             <div className="absolute inset-0 z-0">
                 <Image
                     src="/images/barbershop-bg.jpg"
@@ -54,10 +49,11 @@ export default function Home() {
                     style={{ objectFit: 'cover' }}
                     priority
                 />
-                <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/60 to-black/80" />
             </div>
-            **/}
-
+            {/* 3D Animation Background */}
+            <div className="absolute inset-0 z-10 pointer-events-none">
+                <TrimmerViewer />
+            </div>
             {/* Logo */}
             <div className="absolute top-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center">
                 <div className="bg-yellow-400 rounded-full p-3 shadow-lg mb-2">

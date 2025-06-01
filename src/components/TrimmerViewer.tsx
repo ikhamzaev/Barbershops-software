@@ -21,8 +21,8 @@ function TrimmerModel() {
     useFrame(({ clock }) => {
         if (ref.current) {
             const t = clock.getElapsedTime();
-            // Y axis: continuous spin
-            ref.current.rotation.y = Math.PI + t * 0.4;
+            // Y axis: ping-pong (blade centered)
+            ref.current.rotation.y = Math.PI + Math.sin(t * 0.7) * Math.PI;
             // X axis: slow continuous orbit
             ref.current.rotation.x = -Math.PI / 2 + Math.sin(t * 0.5) * 0.4;
             // Z axis: gentle flip/wobble
@@ -50,9 +50,8 @@ export default function TrimmerViewer() {
             style={{ position: 'absolute', inset: 0, zIndex: 1 }}
             camera={{ position: [0, 0, 5] }}
             shadows
+            gl={{ alpha: true }}
         >
-            {/* Dark background for contrast */}
-            <color attach="background" args={["#18181b"]} />
             {/* Lighting setup for realism and depth */}
             <ambientLight intensity={0.3} />
             <directionalLight
