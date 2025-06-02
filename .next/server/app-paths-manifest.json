@@ -1,4 +1,7 @@
 {
   "/page": "app/page.js",
-  "/client-auth/page": "app/client-auth/page.js"
+  "/client-auth/page": "app/client-auth/page.js",
+  "/client-dashboard/barbershop/[id]/page": "app/client-dashboard/barbershop/[id]/page.js",
+  "/client-dashboard/page": "app/client-dashboard/page.js",
+  "/client-dashboard/barbershop/[id]/schedule/page": "app/client-dashboard/barbershop/[id]/schedule/page.js"
 }

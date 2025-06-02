@@ -64,10 +64,10 @@ function BookingSuccessContent() {
                     <FiCheckCircle className="w-8 h-8 text-green-500" />
                 </div>
                 <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                    Booking Confirmed!
+                    Band qilish muvaffaqiyatli!
                 </h1>
                 <p className="text-gray-600 mb-8">
-                    Your appointment has been successfully booked.
+                    Navbatingiz muvaffaqiyatli band qilindi.
                 </p>
                 {/* Barber and Barbershop Info */}
                 <div className="flex flex-col items-center mb-6">
@@ -82,16 +82,16 @@ function BookingSuccessContent() {
                         <span className="font-medium text-gray-700">Barbershop:</span> {barbershops?.name}
                     </div>
                     <div className="mb-2">
-                        <span className="font-medium text-gray-700">Address:</span> {barbershops?.address}
+                        <span className="font-medium text-gray-700">Manzil:</span> {barbershops?.address}
                     </div>
                     {barbershops?.phone && (
                         <div className="mb-2">
-                            <span className="font-medium text-gray-700">Phone:</span> {barbershops.phone}
+                            <span className="font-medium text-gray-700">Telefon:</span> {barbershops.phone}
                         </div>
                     )}
                     {barbershops?.location && (
                         <div className="mb-2">
-                            <span className="font-medium text-gray-700">Location:</span>
+                            <span className="font-medium text-gray-700">Joylashuv:</span>
                             <a
                                 href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(barbershops.location)}`}
                                 target="_blank"
@@ -103,14 +103,14 @@ function BookingSuccessContent() {
                         </div>
                     )}
                     <div className="mb-2">
-                        <span className="font-medium text-gray-700">Date:</span> {appointment_date}
+                        <span className="font-medium text-gray-700">Sana:</span> {appointment_date}
                     </div>
                     <div className="mb-2">
-                        <span className="font-medium text-gray-700">Time:</span> {appointment_time}
+                        <span className="font-medium text-gray-700">Vaqt:</span> {appointment_time}
                     </div>
                     {services && (
                         <div className="mb-2">
-                            <span className="font-medium text-gray-700">Service:</span> {services.name} {services.price && (<span className="text-gray-500">(${services.price})</span>)}
+                            <span className="font-medium text-gray-700">Xizmat:</span> {services.name} {services.price && (<span className="text-gray-500">({services.price.toLocaleString()} so‘m)</span>)}
                         </div>
                     )}
                 </div>
@@ -118,16 +118,16 @@ function BookingSuccessContent() {
                     onClick={() => router.push(`/client-dashboard/messages?barber=${barbers?.id}`)}
                     className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-lg font-semibold transition mb-4"
                 >
-                    Message Barber
+                    Barberga yozish
                 </button>
                 <p className="text-sm text-gray-500 mb-6">
-                    Redirecting to your appointments page in 5 seconds...
+                    5 soniyadan so‘ng navbatlaringiz sahifasiga o‘tasiz...
                 </p>
                 <button
                     onClick={() => router.push('/client-dashboard/appointments')}
                     className="w-full bg-gray-900 hover:bg-gray-800 text-white py-3 rounded-lg font-semibold transition"
                 >
-                    View My Appointments
+                    Navbatlarimni ko‘rish
                 </button>
             </div>
         </div>

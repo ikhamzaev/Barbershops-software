@@ -1,5 +1,6 @@
-import { Canvas, useFrame, useLoader } from '@react-three/fiber';
+import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader';
+import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader';
 import { useRef, useEffect, useState } from 'react';
 import * as THREE from 'three';
 
@@ -14,24 +15,33 @@ function useIsMobile() {
     return isMobile;
 }
 
-function TrimmerModel() {
-    const obj = useLoader(OBJLoader, '/Hair-trimmer.obj');
+function ChairModel({ onLoaded }: { onLoaded?: () => void }) {
+    const [object, setObject] = useState<THREE.Group | null>(null);
     const ref = useRef<THREE.Group>(null);
     const isMobile = useIsMobile();
-    useFrame(({ clock }) => {
+
+    useEffect(() => {
+        const mtlLoader = new MTLLoader();
+        mtlLoader.setResourcePath('/3d-chair/maps/');
+        mtlLoader.load('/3d-chair/barber_chair_3ds.mtl', (materials) => {
+            materials.preload();
+            const objLoader = new OBJLoader();
+            objLoader.setMaterials(materials);
+            objLoader.load('/3d-chair/barber_chair_3ds.obj', (obj) => {
+                setObject(obj);
+                if (onLoaded) onLoaded();
+            });
+        });
+    }, [onLoaded]);
+
+    useFrame(() => {
         if (ref.current) {
-            const t = clock.getElapsedTime();
-            // Y axis: ping-pong (blade centered)
-            ref.current.rotation.y = Math.PI + Math.sin(t * 0.7) * Math.PI;
-            // X axis: slow continuous orbit
-            ref.current.rotation.x = -Math.PI / 2 + Math.sin(t * 0.5) * 0.4;
-            // Z axis: gentle flip/wobble
-            ref.current.rotation.z = Math.sin(t * 0.7) * 0.5;
+            ref.current.rotation.y += 0.01; // Smooth 360-degree rotation
         }
     });
-    // Responsive scale
-    const scale = isMobile ? 0.45 : 0.75;
-    return <primitive object={obj} ref={ref} scale={scale} />;
+    // Center and lower the chair
+    if (!object) return null;
+    return <primitive object={object} ref={ref} scale={0.04} position={[0, -1.5, 0]} />;
 }
 
 function Shadow() {
@@ -44,15 +54,16 @@ function Shadow() {
     );
 }
 
-export default function TrimmerViewer() {
+export default function TrimmerViewer({ onLoaded }: { onLoaded?: () => void }) {
     return (
         <Canvas
-            style={{ position: 'absolute', inset: 0, zIndex: 1 }}
-            camera={{ position: [0, 0, 5] }}
+            style={{ position: 'absolute', inset: 0, zIndex: 1, background: 'transparent' }}
+            camera={{}}
             shadows
-            gl={{ alpha: true }}
+            gl={{ alpha: true, preserveDrawingBuffer: true }}
         >
-            {/* Lighting setup for realism and depth */}
+            {/* Transparent background for video */}
+            <CameraController />
             <ambientLight intensity={0.3} />
             <directionalLight
                 position={[10, 10, 5]}
@@ -66,14 +77,22 @@ export default function TrimmerViewer() {
                 intensity={0.3}
                 color="#ffd700"
             />
-            {/* Rim light for edge highlight */}
             <directionalLight
                 position={[0, 10, -10]}
                 intensity={0.4}
                 color="#aeefff"
             />
-            <TrimmerModel />
+            <ChairModel onLoaded={onLoaded} />
             <Shadow />
         </Canvas>
     );
+}
+
+function CameraController() {
+    const { camera } = useThree();
+    useFrame(() => {
+        camera.position.set(0, 2.5, 5); // Higher, in front
+        camera.lookAt(0, 0.5, 0);      // Look down at the chair
+    });
+    return null;
 } 

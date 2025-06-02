@@ -15,6 +15,37 @@
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/client-auth/page.js"
+    ],
+    "/client-dashboard/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/client-dashboard/page.js"
+    ],
+    "/client-dashboard/layout": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/client-dashboard/layout.js"
+    ],
+    "/client-dashboard/error": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/client-dashboard/error.js"
+    ],
+    "/client-dashboard/barbershop/[id]/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/client-dashboard/barbershop/[id]/page.js"
+    ],
+    "/client-dashboard/barbershop/[id]/schedule/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/client-dashboard/barbershop/[id]/schedule/page.css",
+      "static/chunks/app/client-dashboard/barbershop/[id]/schedule/page.js"
+    ],
+    "/client-dashboard/messages/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/client-dashboard/messages/page.js"
     ]
   }
 }

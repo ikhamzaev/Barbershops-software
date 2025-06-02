@@ -91,7 +91,7 @@ export default function ServiceSelection({ barberId, onServicesSelected }: Servi
                                 </div>
                                 <div className="flex items-center">
                                     <span className="text-lg font-semibold text-purple-600">
-                                        ${service.price}
+                                        {service.price.toLocaleString()} so‘m
                                     </span>
                                     <span className="ml-2 text-sm text-gray-500">
                                         ({service.duration} min)
