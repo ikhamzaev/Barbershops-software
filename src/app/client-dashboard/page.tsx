@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabaseClient";
-import { FiBell, FiSearch, FiSliders, FiHome, FiHeart, FiGrid, FiMessageCircle, FiCalendar } from "react-icons/fi";
+import { FiBell, FiSearch, FiSliders, FiHome, FiHeart, FiGrid, FiMessageCircle, FiCalendar, FiScissors } from "react-icons/fi";
 import { AiFillHeart } from "react-icons/ai";
 import Link from "next/link";
 import CitySelector from "@/components/CitySelector";
@@ -26,6 +26,8 @@ export default function ClientDashboard() {
     const [selectedCity, setSelectedCity] = useState<CityId | null>(null);
     const [recentVisit, setRecentVisit] = useState<any>(null);
     const [favoriteBarbershopIds, setFavoriteBarbershopIds] = useState<string[]>([]);
+    const [notificationsOpen, setNotificationsOpen] = useState(false);
+    const [upcomingAppointments, setUpcomingAppointments] = useState<any[]>([]);
 
     useEffect(() => {
         async function fetchBarbershops() {
@@ -82,6 +84,22 @@ export default function ClientDashboard() {
         }
         fetchFavorites();
     }, []);
+
+    useEffect(() => {
+        async function fetchUpcomingAppointments() {
+            if (!user) return;
+            const all = await getAppointmentsByClient(user.id);
+            const now = new Date();
+            const upcoming = all.filter(a => {
+                const [year, month, day] = a.appointment_date.split('-').map(Number);
+                const [hours, minutes] = a.appointment_time.split(':').map(Number);
+                const apptDate = new Date(year, month - 1, day, hours, minutes);
+                return apptDate >= now;
+            });
+            setUpcomingAppointments(upcoming);
+        }
+        fetchUpcomingAppointments();
+    }, [user]);
 
     const fetchRecentVisit = async () => {
         if (!user) return;
@@ -222,9 +240,45 @@ export default function ClientDashboard() {
                                 )}
                             </div>
                         </div>
-                        <button className="text-gray-400 hover:text-purple-500 text-2xl" title="Bildirishnomalar">
-                            <FiBell />
-                        </button>
+                        <div className="relative">
+                            <button
+                                className="text-gray-400 hover:text-purple-500 text-2xl relative"
+                                title="Bildirishnomalar"
+                                onClick={() => setNotificationsOpen(v => !v)}
+                            >
+                                <FiBell />
+                                {upcomingAppointments.length > 0 && (
+                                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 font-bold">{upcomingAppointments.length}</span>
+                                )}
+                            </button>
+                            {notificationsOpen && (
+                                <div className="absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-xl shadow-lg z-50">
+                                    <div className="p-4 border-b border-gray-100 font-semibold text-gray-700">Bildirishnomalar</div>
+                                    <div className="max-h-80 overflow-y-auto divide-y divide-gray-100">
+                                        {upcomingAppointments.length === 0 ? (
+                                            <div className="p-4 text-gray-400 text-center">Hozircha yangi bildirishnoma yo‘q.</div>
+                                        ) : (
+                                            upcomingAppointments.map((apt, idx) => (
+                                                <div key={apt.id} className="flex items-start gap-3 p-4 hover:bg-gray-50 transition">
+                                                    <img src={apt.barbers?.photo_url || '/default-avatar.png'} alt={apt.barbers?.name} className="w-10 h-10 rounded-full object-cover border-2 border-yellow-400" />
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="text-gray-900 font-semibold text-sm flex items-center gap-2">
+                                                            {apt.barbers?.name}
+                                                            <span className="bg-yellow-600 text-xs text-white px-2 py-0.5 rounded ml-1">PRO</span>
+                                                        </div>
+                                                        <div className="text-gray-500 text-xs mt-0.5">{apt.barbershops?.name}</div>
+                                                        <div className="text-gray-400 text-xs mt-0.5 flex items-center gap-1">
+                                                            <FiCalendar className="inline-block" /> {apt.appointment_date} {apt.appointment_time}
+                                                        </div>
+                                                        <div className="text-xs text-green-600 mt-1">Uchrashuv band qilindi</div>
+                                                    </div>
+                                                </div>
+                                            ))
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                     {/* Search Bar */}
@@ -268,12 +322,12 @@ export default function ClientDashboard() {
                                         }
                                     }}
                                 >
-                                    Book
+                                    Yozilish
                                 </button>
                             </div>
                         ) : (
                             <div className="bg-white rounded-2xl flex items-center p-4 shadow mb-4 border border-gray-100 text-gray-400">
-                                No recent visits yet. Book your first appointment!
+                                Hali tashriflar yo‘q. Birinchi bor uchrashuvga yoziling!
                             </div>
                         )}
                     </div>

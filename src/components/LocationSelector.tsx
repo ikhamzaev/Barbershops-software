@@ -59,15 +59,15 @@ export default function LocationSelector({ onSelect, currentCityId, className = 
         <div className={`relative ${className}`} ref={dropdownRef}>
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="w-full flex items-center justify-between px-4 py-2 text-left bg-gray-800 border border-gray-700 rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                className="w-full flex items-center justify-between px-4 py-2 text-left bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-400"
             >
-                <span className="text-gray-300">
+                <span className="text-gray-700">
                     {currentCity && selectedRegion
                         ? `${currentCity.name}, ${selectedRegion.name}`
                         : "Manzilni tanlang"}
                 </span>
                 <svg
-                    className={`w-5 h-5 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+                    className={`w-5 h-5 text-purple-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -77,14 +77,14 @@ export default function LocationSelector({ onSelect, currentCityId, className = 
             </button>
 
             {isOpen && (
-                <div className="absolute z-50 w-full mt-1 bg-gray-800 border border-gray-700 rounded-lg shadow-lg">
+                <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg">
                     <div className="p-2">
                         <input
                             type="text"
                             placeholder="Qidirish..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-gray-300 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                            className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-md text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400"
                         />
                     </div>
 
@@ -96,7 +96,7 @@ export default function LocationSelector({ onSelect, currentCityId, className = 
                                     <button
                                         key={region.id}
                                         onClick={() => setSelectedRegion(region)}
-                                        className="w-full px-4 py-2 text-left text-gray-300 hover:bg-gray-700 focus:outline-none"
+                                        className="w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100 focus:outline-none"
                                     >
                                         {region.name}
                                     </button>
@@ -110,7 +110,7 @@ export default function LocationSelector({ onSelect, currentCityId, className = 
                                         setSelectedRegion(null);
                                         setSearchQuery('');
                                     }}
-                                    className="w-full px-4 py-2 text-left text-gray-400 hover:bg-gray-700 focus:outline-none flex items-center"
+                                    className="w-full px-4 py-2 text-left text-gray-400 hover:bg-gray-100 focus:outline-none flex items-center"
                                 >
                                     <svg
                                         className="w-5 h-5 mr-2"
@@ -129,7 +129,7 @@ export default function LocationSelector({ onSelect, currentCityId, className = 
                                             onSelect(city.id);
                                             setIsOpen(false);
                                         }}
-                                        className="w-full px-4 py-2 text-left text-gray-300 hover:bg-gray-700 focus:outline-none"
+                                        className="w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100 focus:outline-none"
                                     >
                                         {city.name}
                                     </button>

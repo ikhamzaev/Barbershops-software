@@ -101,6 +101,11 @@
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/barber-dashboard/analytics/page.js"
+    ],
+    "/barbershop-onboarding/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/barbershop-onboarding/page.js"
     ]
   }
 }
