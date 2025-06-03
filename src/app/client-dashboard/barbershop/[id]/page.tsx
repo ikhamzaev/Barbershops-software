@@ -4,6 +4,8 @@ import { useRouter, useSearchParams, useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { format, addDays } from "date-fns";
+import { AiFillHeart } from "react-icons/ai";
+import { FiHeart } from "react-icons/fi";
 
 function getDayOfWeek(date: Date) {
     return ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][date.getDay()];
@@ -37,6 +39,7 @@ export default function BarbershopPage() {
     const [loading, setLoading] = useState(true);
     const [availability, setAvailability] = useState<Record<string, any>>({});
     const [appointments, setAppointments] = useState<Record<string, any[]>>({});
+    const [favoriteBarberIds, setFavoriteBarberIds] = useState<string[]>([]);
 
     useEffect(() => {
         async function fetchBarbershopAndBarbers() {
@@ -93,8 +96,50 @@ export default function BarbershopPage() {
         if (barbershopId) fetchBarbershopAndBarbers();
     }, [barbershopId, router]);
 
+    useEffect(() => {
+        async function fetchFavorites() {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+            const { data, error } = await supabase
+                .from('favorites')
+                .select('favorite_id')
+                .eq('user_id', user.id)
+                .eq('favorite_type', 'barber');
+            if (data) {
+                setFavoriteBarberIds(data.map(f => f.favorite_id));
+            }
+        }
+        fetchFavorites();
+    }, []);
+
     const handleSlotClick = (barberId: string, slot: string) => {
         router.push(`/client-dashboard/barbershop/${barbershopId}/schedule?barber=${barberId}&time=${slot}`);
+    };
+
+    const handleToggleFavoriteBarber = async (barberId: string) => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+        const isFavorite = favoriteBarberIds.includes(barberId);
+        if (isFavorite) {
+            // Remove from favorites
+            await supabase
+                .from('favorites')
+                .delete()
+                .eq('user_id', user.id)
+                .eq('favorite_type', 'barber')
+                .eq('favorite_id', barberId);
+            setFavoriteBarberIds(ids => ids.filter(id => id !== barberId));
+        } else {
+            // Add to favorites
+            await supabase
+                .from('favorites')
+                .insert({
+                    user_id: user.id,
+                    favorite_type: 'barber',
+                    favorite_id: barberId,
+                });
+            setFavoriteBarberIds(ids => [...ids, barberId]);
+        }
     };
 
     return (
@@ -138,28 +183,54 @@ export default function BarbershopPage() {
                                 const nextSession = availableSlots.length > 0 ? availableSlots[0] : 'No slots';
                                 const rating = mockRatings[idx % mockRatings.length];
                                 return (
-                                    <button key={barber.id} className="w-full text-left bg-white rounded-2xl shadow p-4 flex flex-col md:flex-row md:items-center gap-4 border border-gray-100 hover:ring-2 hover:ring-yellow-400 transition" onClick={() => router.push(`/client-dashboard/barbershop/${barbershopId}/schedule?barber=${barber.id}`)}>
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
-                                                {barber.photo_url || barber.avatar ? (
-                                                    <img src={barber.photo_url || barber.avatar} alt={barber.name} className="object-cover w-full h-full" />
+                                    <div key={barber.id} className="relative">
+                                        <button
+                                            className={`absolute top-3 right-3 z-10 transition-transform duration-150 focus:outline-none group`}
+                                            onClick={e => { e.stopPropagation(); handleToggleFavoriteBarber(barber.id); }}
+                                            aria-label={favoriteBarberIds.includes(barber.id) ? "Sevimlilardan olib tashlash" : "Sevimlilarga qo'shish"}
+                                        >
+                                            <span
+                                                className={`
+                                                    inline-flex items-center justify-center
+                                                    rounded-full p-2
+                                                    bg-black/40
+                                                    shadow-lg
+                                                    transition-all duration-200
+                                                    group-hover:scale-110
+                                                    group-hover:bg-black/60
+                                                    ${favoriteBarberIds.includes(barber.id) ? 'ring-2 ring-pink-400' : ''}
+                                                `}
+                                            >
+                                                {favoriteBarberIds.includes(barber.id) ? (
+                                                    <AiFillHeart className="text-pink-500 transition-colors duration-150" />
                                                 ) : (
-                                                    <FiUser className="text-gray-400 text-3xl" />
+                                                    <FiHeart className="text-gray-700 transition-colors duration-150" />
                                                 )}
-                                            </div>
-                                            <div>
-                                                <div className="font-bold text-gray-900 text-lg">{barber.name}</div>
-                                                <div className="text-xs text-green-700 font-semibold mb-1">Barber seti BORODACH</div>
-                                                <div className="flex items-center gap-1 text-yellow-500 text-sm mb-1">
-                                                    {Array.from({ length: 5 }).map((_, i) => (
-                                                        <FiStar key={i} className={i < rating.rating ? 'text-yellow-400' : 'text-gray-300'} />
-                                                    ))}
-                                                    <span className="text-gray-600 ml-1 text-xs">({rating.reviews})</span>
+                                            </span>
+                                        </button>
+                                        <button className="w-full text-left bg-white rounded-2xl shadow p-4 flex flex-col md:flex-row md:items-center gap-4 border border-gray-100 hover:ring-2 hover:ring-yellow-400 transition" onClick={() => router.push(`/client-dashboard/barbershop/${barbershopId}/schedule?barber=${barber.id}`)}>
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
+                                                    {barber.photo_url || barber.avatar ? (
+                                                        <img src={barber.photo_url || barber.avatar} alt={barber.name} className="object-cover w-full h-full" />
+                                                    ) : (
+                                                        <FiUser className="text-gray-400 text-3xl" />
+                                                    )}
                                                 </div>
-                                                <div className="text-xs text-gray-500 mb-1">Ближайший сеанс: {nextSession}</div>
+                                                <div>
+                                                    <div className="font-bold text-gray-900 text-lg">{barber.name}</div>
+                                                    <div className="text-xs text-green-700 font-semibold mb-1">Barber seti BORODACH</div>
+                                                    <div className="flex items-center gap-1 text-yellow-500 text-sm mb-1">
+                                                        {Array.from({ length: 5 }).map((_, i) => (
+                                                            <FiStar key={i} className={i < rating.rating ? 'text-yellow-400' : 'text-gray-300'} />
+                                                        ))}
+                                                        <span className="text-gray-600 ml-1 text-xs">({rating.reviews})</span>
+                                                    </div>
+                                                    <div className="text-xs text-gray-500 mb-1">Ближайший сеанс: {nextSession}</div>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </button>
+                                        </button>
+                                    </div>
                                 );
                             })
                         )}

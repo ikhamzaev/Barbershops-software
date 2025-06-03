@@ -13,20 +13,20 @@ interface OnboardingStep {
 
 const steps: OnboardingStep[] = [
     {
-        title: 'Basic Information',
-        description: 'Tell us about your barbershop'
+        title: "Asosiy ma'lumotlar",
+        description: "Sartaroshxona haqida ma'lumot kiriting"
     },
     {
-        title: 'Location & Hours',
-        description: 'Set your business location and operating hours'
+        title: "Manzil va ish vaqtlari",
+        description: "Manzilingiz va ish vaqtlaringizni belgilang"
     },
     {
-        title: 'Services & Pricing',
-        description: 'Define your services and set prices'
+        title: "Xizmatlar va narxlar",
+        description: "Xizmatlaringiz va narxlarini belgilang"
     },
     {
-        title: 'Add Barbers',
-        description: 'Invite your barbers to join'
+        title: "Barberlarni qo'shish",
+        description: "Barberlaringizni taklif qiling"
     }
 ];
 
@@ -244,13 +244,13 @@ export default function BarbershopOnboarding() {
                                 return (
                                     <div className="space-y-4">
                                         <div className="mb-6">
-                                            <label className="block text-sm font-medium text-gray-700 mb-2">Barbershop Photo</label>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">Sartaroshxona rasmi</label>
                                             <div className="flex items-center gap-4">
                                                 {formData.photo_url ? (
                                                     <img src={formData.photo_url} alt="Barbershop Photo" className="w-20 h-20 rounded-full object-cover" />
                                                 ) : (
                                                     <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center">
-                                                        <span className="text-gray-400">No photo</span>
+                                                        <span className="text-gray-400">Rasm yo'q</span>
                                                     </div>
                                                 )}
                                                 <input
@@ -262,23 +262,23 @@ export default function BarbershopOnboarding() {
                                             </div>
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-semibold text-black">Barbershop Name</label>
+                                            <label className="block text-sm font-semibold text-black">Sartaroshxona nomi</label>
                                             <input
                                                 type="text"
                                                 value={formData.name}
                                                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                                 className="mt-1 block w-full rounded-lg border border-gray-300 bg-white text-black focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none px-4 py-3"
-                                                placeholder="Enter your barbershop name"
+                                                placeholder="Sartaroshxona nomini kiriting"
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-semibold text-black">Description</label>
+                                            <label className="block text-sm font-semibold text-black">Tavsif</label>
                                             <textarea
                                                 value={formData.description}
                                                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                                                 className="mt-1 block w-full rounded-lg border border-gray-300 bg-white text-black focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none px-4 py-3"
                                                 rows={4}
-                                                placeholder="Tell us about your barbershop"
+                                                placeholder="Sartaroshxona haqida qisqacha yozing"
                                             />
                                         </div>
                                     </div>
@@ -287,54 +287,54 @@ export default function BarbershopOnboarding() {
                                 return (
                                     <div className="space-y-4">
                                         <div>
-                                            <label className="block text-sm font-semibold text-black">Region (Province)</label>
+                                            <label className="block text-sm font-semibold text-black">Viloyat</label>
                                             <select
                                                 value={formData.region}
                                                 onChange={(e) => setFormData({ ...formData, region: e.target.value, city: '' })}
                                                 className="mt-1 block w-full rounded-lg border border-gray-300 bg-white text-black focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none px-4 py-3"
                                             >
-                                                <option value="">Select a region</option>
+                                                <option value="">Viloyatni tanlang</option>
                                                 {REGIONS.map((region) => (
                                                     <option key={region.id} value={region.id}>{region.name}</option>
                                                 ))}
                                             </select>
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-semibold text-black">City</label>
+                                            <label className="block text-sm font-semibold text-black">Shahar</label>
                                             <select
                                                 value={formData.city}
                                                 onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                                                 className="mt-1 block w-full rounded-lg border border-gray-300 bg-white text-black focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none px-4 py-3"
                                                 disabled={!formData.region}
                                             >
-                                                <option value="">Select a city</option>
+                                                <option value="">Shaharni tanlang</option>
                                                 {ALL_CITIES.filter(city => city.regionId === formData.region).map((city) => (
                                                     <option key={city.id} value={city.id}>{city.name}</option>
                                                 ))}
                                             </select>
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-semibold text-black">Address</label>
+                                            <label className="block text-sm font-semibold text-black">Manzil</label>
                                             <input
                                                 type="text"
                                                 value={formData.address}
                                                 onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                                                 className="mt-1 block w-full rounded-lg border border-gray-300 bg-white text-black focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none px-4 py-3"
-                                                placeholder="Enter your address"
+                                                placeholder="Manzilingizni kiriting"
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-semibold text-black">Phone</label>
+                                            <label className="block text-sm font-semibold text-black">Telefon raqami</label>
                                             <input
                                                 type="tel"
                                                 value={formData.phone}
                                                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                                                 className="mt-1 block w-full rounded-lg border border-gray-300 bg-white text-black focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none px-4 py-3"
-                                                placeholder="Enter your phone number"
+                                                placeholder="Telefon raqamingizni kiriting"
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-sm font-semibold text-black">Business Hours</label>
+                                            <label className="block text-sm font-semibold text-black">Ish vaqtlari</label>
                                             {Object.entries(formData.businessHours).map(([day, hours]) => (
                                                 <div key={day} className="mt-2 flex items-center space-x-4">
                                                     <span className="text-gray-500 w-24 capitalize">{day}</span>
@@ -350,7 +350,7 @@ export default function BarbershopOnboarding() {
                                                         })}
                                                         className="rounded-lg border border-gray-300 bg-white text-black focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none px-3 py-2"
                                                     />
-                                                    <span className="text-gray-400">to</span>
+                                                    <span className="text-gray-400">dan</span>
                                                     <input
                                                         type="time"
                                                         value={hours.close}
@@ -377,41 +377,41 @@ export default function BarbershopOnboarding() {
                                                     <h3 className="text-black font-semibold">{service.name}</h3>
                                                     <p className="text-gray-600">{service.description}</p>
                                                     <div className="mt-2 flex justify-between text-gray-500">
-                                                        <span>{service.duration} minutes</span>
+                                                        <span>{service.duration} minut</span>
                                                         <span>{service.price.toLocaleString()} UZS</span>
                                                     </div>
                                                 </div>
                                             ))}
                                         </div>
                                         <div className="mt-4 space-y-4">
-                                            <h3 className="text-black font-semibold">Add New Service</h3>
+                                            <h3 className="text-black font-semibold">Yangi xizmat qo'shish</h3>
                                             <div className="grid grid-cols-2 gap-4">
                                                 <input
                                                     type="text"
                                                     value={newService.name}
                                                     onChange={(e) => setNewService({ ...newService, name: e.target.value })}
-                                                    placeholder="Service name"
+                                                    placeholder="Xizmat nomi"
                                                     className="rounded-lg border border-gray-300 bg-white text-black focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none px-4 py-3"
                                                 />
                                                 <input
                                                     type="text"
                                                     value={newService.description}
                                                     onChange={(e) => setNewService({ ...newService, description: e.target.value })}
-                                                    placeholder="Service description"
+                                                    placeholder="Xizmat tavsifi"
                                                     className="rounded-lg border border-gray-300 bg-white text-black focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none px-4 py-3"
                                                 />
                                                 <input
                                                     type="number"
                                                     value={newService.duration}
                                                     onChange={(e) => setNewService({ ...newService, duration: parseInt(e.target.value) })}
-                                                    placeholder="Duration (minutes)"
+                                                    placeholder="Davomiyligi (minut)"
                                                     className="rounded-lg border border-gray-300 bg-white text-black focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none px-4 py-3"
                                                 />
                                                 <input
                                                     type="number"
                                                     value={newService.price}
                                                     onChange={(e) => setNewService({ ...newService, price: parseInt(e.target.value) })}
-                                                    placeholder="Price (UZS)"
+                                                    placeholder="Narx (UZS)"
                                                     className="rounded-lg border border-gray-300 bg-white text-black focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none px-4 py-3"
                                                 />
                                             </div>
@@ -419,7 +419,7 @@ export default function BarbershopOnboarding() {
                                                 onClick={addService}
                                                 className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold shadow-sm"
                                             >
-                                                Add Service
+                                                Qo'shish
                                             </button>
                                         </div>
                                     </div>
@@ -434,7 +434,7 @@ export default function BarbershopOnboarding() {
                                                         <h3 className="text-black font-semibold">{barber.name}</h3>
                                                         <p className="text-gray-600">{barber.email}</p>
                                                         <div className="mt-2">
-                                                            <span className="text-gray-500">Specialties: </span>
+                                                            <span className="text-gray-500">Ixtisosliklar: </span>
                                                             {barber.specialties.join(', ')}
                                                         </div>
                                                     </div>
@@ -448,20 +448,20 @@ export default function BarbershopOnboarding() {
                                             ))}
                                         </div>
                                         <div className="mt-4 space-y-4">
-                                            <h3 className="text-black font-semibold">Add New Barber</h3>
+                                            <h3 className="text-black font-semibold">Yangi barber qo'shish</h3>
                                             <div className="grid grid-cols-2 gap-4">
                                                 <input
                                                     type="text"
                                                     value={newBarber.name}
                                                     onChange={(e) => setNewBarber({ ...newBarber, name: e.target.value })}
-                                                    placeholder="Barber name"
+                                                    placeholder="Ism"
                                                     className="rounded-lg border border-gray-300 bg-white text-black focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none px-4 py-3"
                                                 />
                                                 <input
                                                     type="email"
                                                     value={newBarber.email}
                                                     onChange={(e) => setNewBarber({ ...newBarber, email: e.target.value })}
-                                                    placeholder="Barber email"
+                                                    placeholder="Email"
                                                     className="rounded-lg border border-gray-300 bg-white text-black focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none px-4 py-3"
                                                 />
                                             </div>
@@ -469,7 +469,7 @@ export default function BarbershopOnboarding() {
                                                 onClick={addBarber}
                                                 className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold shadow-sm"
                                             >
-                                                Add Barber
+                                                Qo'shish
                                             </button>
                                         </div>
                                     </div>

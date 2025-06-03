@@ -10,11 +10,15 @@ interface Appointment {
         name: string;
         phone: string;
     };
-    services?: {
+    appointment_services?: {
         id: string;
-        name: string;
-        price: number;
-    };
+        price_at_time: number;
+        barber_service: {
+            id: string;
+            name: string;
+            duration: number;
+        };
+    }[];
 }
 
 const statusColors: Record<string, string> = {
@@ -37,7 +41,9 @@ const AppointmentsList: React.FC<{ appointments: Appointment[] }> = ({ appointme
                 <div key={a.id} className="bg-white rounded-2xl shadow p-4 flex items-center justify-between">
                     <div>
                         <div className="text-gray-900 font-medium">{a.client?.name || 'Unknown Client'}</div>
-                        <div className="text-gray-500 text-sm">{a.services?.name || 'No service selected'}</div>
+                        <div className="text-gray-500 text-sm">
+                            {a.appointment_services?.map(service => service.barber_service.name).join(', ') || 'No service selected'}
+                        </div>
                         {a.client?.phone && (
                             <div className="text-gray-500 text-xs">{a.client.phone}</div>
                         )}

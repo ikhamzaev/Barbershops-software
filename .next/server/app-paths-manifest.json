@@ -1,7 +1,7 @@
 {
-  "/page": "app/page.js",
-  "/client-auth/page": "app/client-auth/page.js",
-  "/client-dashboard/barbershop/[id]/page": "app/client-dashboard/barbershop/[id]/page.js",
-  "/client-dashboard/page": "app/client-dashboard/page.js",
-  "/client-dashboard/barbershop/[id]/schedule/page": "app/client-dashboard/barbershop/[id]/schedule/page.js"
+  "/barber-dashboard/clients/page": "app/barber-dashboard/clients/page.js",
+  "/barber-dashboard/services/page": "app/barber-dashboard/services/page.js",
+  "/barber-dashboard/analytics/page": "app/barber-dashboard/analytics/page.js",
+  "/barber-dashboard/settings/page": "app/barber-dashboard/settings/page.js",
+  "/page": "app/page.js"
 }

@@ -46,6 +46,61 @@
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/client-dashboard/messages/page.js"
+    ],
+    "/barber-auth/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/barber-auth/page.js"
+    ],
+    "/barber-dashboard/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/barber-dashboard/page.js"
+    ],
+    "/barber-dashboard/calendar/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/barber-dashboard/calendar/page.js"
+    ],
+    "/barber-dashboard/clients/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/barber-dashboard/clients/page.js"
+    ],
+    "/barber-dashboard/services/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/barber-dashboard/services/page.js"
+    ],
+    "/barber-dashboard/chat/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/barber-dashboard/chat/page.js"
+    ],
+    "/barber-dashboard/settings/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/barber-dashboard/settings/page.js"
+    ],
+    "/client-dashboard/booking-success/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/client-dashboard/booking-success/page.js"
+    ],
+    "/client-dashboard/appointments/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/client-dashboard/appointments/page.js"
+    ],
+    "/client-dashboard/favorites/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/client-dashboard/favorites/page.js"
+    ],
+    "/barber-dashboard/analytics/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/barber-dashboard/analytics/page.js"
     ]
   }
 }

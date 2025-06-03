@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { FaCalendarAlt, FaClock, FaUser, FaSignOutAlt, FaUsers, FaUserCircle } from 'react-icons/fa';
 import { supabase } from '@/lib/supabaseClient';
 import BarberProfileCard from '@/components/barber/BarberProfileCard';
-import AppointmentsList from '@/components/barber/AppointmentsList';
 import BarberNavbar from '@/components/barber/BarberNavbar';
 
 interface Appointment {
@@ -45,7 +44,6 @@ interface Barber {
 
 function BarberDashboard() {
     const [barber, setBarber] = useState<Barber | null>(null);
-    const [appointments, setAppointments] = useState<Appointment[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const router = useRouter();
@@ -62,19 +60,9 @@ function BarberDashboard() {
                 // Fetch barber data
                 const { data: barberData, error: barberError } = await supabase
                     .from('barbers')
-                    .select(`
-                        id,
-                        name,
-                        email,
-                        barbershop:barbershops (
-                            id,
-                            name,
-                            city,
-                            logo_url
-                        )
-                    `)
+                    .select('*')
                     .eq('user_id', user.id)
-                    .maybeSingle() as { data: Barber | null, error: any };
+                    .maybeSingle();
 
                 if (barberError || !barberData) {
                     setError('No barber profile found. Please contact support or try signing up again.');
@@ -83,37 +71,6 @@ function BarberDashboard() {
                 }
 
                 setBarber(barberData);
-
-                // Fetch today's appointments
-                const today = new Date().toISOString().split('T')[0];
-                console.log('Fetching appointments for barber:', barberData.id, 'on date:', today);
-
-                const { data: appointmentsData, error: appointmentsError } = await supabase
-                    .from('appointments')
-                    .select(`
-                        *,
-                        client:client_id (
-                            id,
-                            name,
-                            phone
-                        ),
-                        services:service_id (
-                            id,
-                            name,
-                            price
-                        )
-                    `)
-                    .eq('barber_id', barberData.id)
-                    .eq('appointment_date', today)
-                    .order('appointment_time');
-
-                if (appointmentsError) {
-                    console.error('Error fetching appointments:', appointmentsError);
-                    throw appointmentsError;
-                }
-
-                console.log('Fetched appointments:', appointmentsData);
-                setAppointments(appointmentsData || []);
             } catch (error: any) {
                 setError(error.message);
             } finally {
@@ -122,6 +79,10 @@ function BarberDashboard() {
         };
         fetchBarberData();
     }, [router, supabase]);
+
+    useEffect(() => {
+        router.replace('/barber-dashboard/calendar');
+    }, [router]);
 
     const handleSignOut = async () => {
         await supabase.auth.signOut();
@@ -173,10 +134,6 @@ function BarberDashboard() {
                     <span className="text-gray-500 text-xs">Productivity</span>
                     <span className="text-2xl font-bold text-gray-800">45%</span>
                 </div>
-            </div>
-            {/* Today's Appointments */}
-            <div className="max-w-md w-full mx-auto mt-6 flex-1">
-                <AppointmentsList appointments={appointments} />
             </div>
             {/* Bottom Navigation Bar */}
             <div className="fixed bottom-0 left-0 right-0 z-50">

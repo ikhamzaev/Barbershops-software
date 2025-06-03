@@ -186,6 +186,16 @@ export default function SchedulePage({ params }: PageProps) {
                 toast.error('Please sign in to book an appointment');
                 return;
             }
+            // Fetch client name and email from users table
+            const { data: userRow, error: userError } = await supabase
+                .from('users')
+                .select('name, email')
+                .eq('id', user.id)
+                .single();
+            if (userError || !userRow) {
+                toast.error('Could not fetch client info');
+                return;
+            }
             const appointmentDate = selectedDate ? format(selectedDate, 'yyyy-MM-dd') : '';
             const appointmentTime = format(new Date(selectedSlot.start_time), 'HH:mm');
             const endTime = format(new Date(selectedSlot.end_time), 'HH:mm');
@@ -193,6 +203,8 @@ export default function SchedulePage({ params }: PageProps) {
                 .from('appointments')
                 .insert({
                     client_id: user.id,
+                    client_name: userRow.name,
+                    client_email: userRow.email,
                     barber_id: barberId,
                     appointment_date: appointmentDate,
                     appointment_time: appointmentTime,

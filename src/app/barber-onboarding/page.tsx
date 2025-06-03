@@ -26,11 +26,14 @@ function BarberOnboardingContent() {
     const [password, setPassword] = useState('');
     const [phone, setPhone] = useState('');
     const [inviteCode, setInviteCode] = useState('');
-    const [barbershop, setBarbershop] = useState<Barbershop | null>(null);
+    const [barbershopId, setBarbershopId] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+    const [postSignUpLoading, setPostSignUpLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const router = useRouter();
     const searchParams = useSearchParams();
+    const [signedUpUserId, setSignedUpUserId] = useState<string | null>(null);
+    const [inviteValid, setInviteValid] = useState(false);
 
     // Check for invite code in URL
     const codeFromUrl = searchParams.get('code');
@@ -40,20 +43,27 @@ function BarberOnboardingContent() {
 
     // If the user is authenticated and already has a barber profile, redirect to dashboard
     useEffect(() => {
+        if (signedUpUserId) return; // Don't run initial check after sign-up
         const checkBarberProfile = async () => {
             const { data: { user } } = await supabase.auth.getUser();
+            console.log('DEBUG: Session user:', user);
             if (!user) return;
+            // Use only a simple select for maximum compatibility
             const { data: barber, error } = await supabase
                 .from('barbers')
-                .select('id')
+                .select('*')
                 .eq('user_id', user.id)
                 .maybeSingle();
+            console.log('DEBUG: Barber profile query for user_id', user.id, 'result:', barber, 'error:', error);
             if (barber && !error) {
                 router.push('/barber-dashboard');
+            } else {
+                setError('Barber profile not found. Please check your credentials or contact your admin.');
+                console.log('DEBUG: No barber profile found for user_id', user.id);
             }
         };
         checkBarberProfile();
-    }, [router]);
+    }, [router, signedUpUserId]);
 
     const handleInviteCodeSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -61,24 +71,27 @@ function BarberOnboardingContent() {
         setLoading(true);
 
         try {
-            // Verify invite code and get barbershop info
+            // Validate invite code and email using correct column names
             const { data: inviteData, error: inviteError } = await supabase
                 .from('barber_invites')
-                .select('barbershop_id, barbershops:barbershops(*)')
+                .select('*')
                 .eq('code', inviteCode)
-                .single() as { data: InviteData | null, error: any };
-
+                .eq('barber_email', email)
+                .maybeSingle();
             if (inviteError) throw inviteError;
             if (!inviteData) {
-                setError('Invalid invite code');
+                setError('Invite code and email do not match any invite.');
                 setLoading(false);
+                setInviteValid(false);
                 return;
             }
-
-            setBarbershop(inviteData.barbershops);
+            // Store barbershop_id for later use
+            setBarbershopId(inviteData.barbershop_id);
+            setInviteValid(true);
             setStep(2);
         } catch (error: any) {
             setError(error.message);
+            setInviteValid(false);
         } finally {
             setLoading(false);
         }
@@ -90,11 +103,25 @@ function BarberOnboardingContent() {
         setLoading(true);
 
         try {
+            // Double-check invite code and email before sign-up
+            const { data: inviteData, error: inviteError } = await supabase
+                .from('barber_invites')
+                .select('*')
+                .eq('code', inviteCode)
+                .eq('barber_email', email)
+                .maybeSingle();
+            if (inviteError) throw inviteError;
+            if (!inviteData) {
+                setError('Invite code and email do not match any invite.');
+                setLoading(false);
+                return;
+            }
             // Create user account
             const { data: { user }, error: signUpError } = await supabase.auth.signUp({
                 email,
                 password,
             });
+            console.log('DEBUG: After signUp, user:', user, 'error:', signUpError);
 
             if (signUpError) throw signUpError;
             if (!user) throw new Error('Failed to create user account');
@@ -108,6 +135,7 @@ function BarberOnboardingContent() {
                     name: name,
                     role: 'barber',
                 });
+            console.log('DEBUG: After user profile insert, error:', profileError);
 
             if (profileError) throw profileError;
 
@@ -116,24 +144,67 @@ function BarberOnboardingContent() {
                 .from('barbers')
                 .insert({
                     user_id: user.id,
-                    barbershop_id: barbershop?.id,
+                    barbershop_id: inviteData.barbershop_id,
                     name: name,
                     email: email
                 });
+            console.log('DEBUG: After barber profile insert, error:', barberError);
 
             if (barberError) throw barberError;
 
-            // Redirect to barber dashboard
-            router.push('/barber-dashboard');
+            // Immediately log the user in to ensure session is established
+            const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
+                email,
+                password,
+            });
+            console.log('DEBUG: After signInWithPassword, loginData:', loginData, 'loginError:', loginError);
+            if (loginError) throw loginError;
+
+            // Now check for barber profile and redirect
+            setSignedUpUserId(user.id);
+            setPostSignUpLoading(true);
+            let found = false;
+            for (let i = 0; i < 10; i++) { // Try for up to ~5 seconds
+                await new Promise(res => setTimeout(res, 500));
+                const { data: { user: sessionUser } } = await supabase.auth.getUser();
+                console.log('DEBUG: Polling for session user:', sessionUser);
+                if (!sessionUser) continue;
+                // Use only a simple select for maximum compatibility
+                const { data: barber, error } = await supabase
+                    .from('barbers')
+                    .select('*')
+                    .eq('user_id', sessionUser.id)
+                    .maybeSingle();
+                console.log('DEBUG: Polling for barber profile for user_id', sessionUser.id, 'result:', barber, 'error:', error);
+                if (barber && !error) {
+                    found = true;
+                    break;
+                }
+            }
+            setPostSignUpLoading(false);
+            if (found) {
+                router.push('/barber-dashboard');
+            } else {
+                setError('Barber profile not found after sign-up. Please try logging in.');
+                console.log('DEBUG: Final fail - barber profile not found after polling.');
+            }
         } catch (error: any) {
             setError(error.message);
+            console.log('DEBUG: Error in handleSignUp:', error);
         } finally {
             setLoading(false);
         }
     };
 
-    // Only show the account creation form (step 2) if barbershop is set
-    if (Number(step) === 2 && barbershop) {
+    // Only show the account creation form (step 2) if barbershopId is set and invite is valid
+    if (Number(step) === 2 && barbershopId && inviteValid) {
+        if (postSignUpLoading) {
+            return (
+                <div className="min-h-screen flex items-center justify-center bg-gray-900">
+                    <div className="text-white text-xl">Profil yaratilmoqda...</div>
+                </div>
+            );
+        }
         return (
             <div className="min-h-screen bg-gray-900 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-md w-full space-y-8">
@@ -141,30 +212,8 @@ function BarberOnboardingContent() {
                         <h2 className="mt-6 text-center text-3xl font-extrabold text-white">
                             {Number(step) === 1 ? 'Join a Barbershop' : 'Create Your Account'}
                         </h2>
-                        {Number(step) === 2 && barbershop && (
-                            <div className="mt-4 bg-gray-800 rounded-lg p-4">
-                                <div className="flex items-center">
-                                    {barbershop.logo_url && (
-                                        <img
-                                            src={barbershop.logo_url}
-                                            alt={barbershop.name}
-                                            className="h-12 w-12 rounded-full object-cover"
-                                        />
-                                    )}
-                                    <div className="ml-4">
-                                        <h3 className="text-lg font-medium text-white">{barbershop.name}</h3>
-                                        <div className="flex items-center text-gray-400 text-sm">
-                                            <FaMapMarkerAlt className="mr-1" />
-                                            {barbershop.city}
-                                        </div>
-                                        <div className="flex items-center text-gray-400 text-sm">
-                                            <FaPhone className="mr-1" />
-                                            {barbershop.phone}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
+                        {/* Optionally show barbershopId for debugging */}
+                        <div className="mt-2 text-gray-400 text-xs">Barbershop ID: {barbershopId}</div>
                     </div>
 
                     <form className="mt-8 space-y-6" onSubmit={handleSignUp}>
@@ -238,10 +287,47 @@ function BarberOnboardingContent() {
             </div>
         );
     }
-    // Otherwise, show a loading spinner
+    // Otherwise, show invite code form or loading spinner
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-900">
-            <div className="text-white text-xl">Loading...</div>
+            <div className="text-white text-xl">
+                {loading ? 'Yuklanmoqda...' : (
+                    <form onSubmit={handleInviteCodeSubmit} className="space-y-4">
+                        <div>
+                            <label htmlFor="invite-code" className="block mb-2">Taklif kodi</label>
+                            <input
+                                id="invite-code"
+                                type="text"
+                                value={inviteCode}
+                                onChange={e => setInviteCode(e.target.value)}
+                                className="w-full px-4 py-2 rounded bg-gray-800 border border-gray-600 text-white"
+                                placeholder="Taklif kodini kiriting"
+                                required
+                            />
+                        </div>
+                        <div>
+                            <label htmlFor="email" className="block mb-2">Email</label>
+                            <input
+                                id="email"
+                                type="email"
+                                value={email}
+                                onChange={e => setEmail(e.target.value)}
+                                className="w-full px-4 py-2 rounded bg-gray-800 border border-gray-600 text-white"
+                                placeholder="Email manzilingiz"
+                                required
+                            />
+                        </div>
+                        {error && <div className="text-red-400 text-sm">{error}</div>}
+                        <button
+                            type="submit"
+                            className="w-full py-2 px-4 bg-purple-600 hover:bg-purple-700 rounded text-white font-semibold"
+                            disabled={loading}
+                        >
+                            Tekshirish
+                        </button>
+                    </form>
+                )}
+            </div>
         </div>
     );
 }

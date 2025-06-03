@@ -102,8 +102,8 @@ export default function CalendarPage() {
         setSelectedDate(next);
     };
 
-    // Use 30-minute slots from 8:00 to 20:00
-    const hours = Array.from({ length: 24 }, (_, i) => {
+    // Use 30-minute slots from 8:00 to 23:00
+    const hours = Array.from({ length: ((23 - 8) * 2) + 2 }, (_, i) => {
         const hour = 8 + Math.floor(i / 2);
         const minute = i % 2 === 0 ? '00' : '30';
         return `${hour.toString().padStart(2, '0')}:${minute}`;

@@ -142,22 +142,9 @@ function BarberSignUpForm({ onSwitch }: { onSwitch: () => void }) {
     const [password, setPassword] = useState('');
     const [name, setName] = useState('');
     const [inviteCode, setInviteCode] = useState('');
-    const [profilePic, setProfilePic] = useState<File | null>(null);
-    const [profilePicPreview, setProfilePicPreview] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const router = useRouter();
-
-    const handleProfilePicChange = (file: File | null) => {
-        setProfilePic(file);
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => setProfilePicPreview(reader.result as string);
-            reader.readAsDataURL(file);
-        } else {
-            setProfilePicPreview(null);
-        }
-    };
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
@@ -182,14 +169,20 @@ function BarberSignUpForm({ onSwitch }: { onSwitch: () => void }) {
 
         setLoading(true);
         try {
-            // Validate invite code
-            const { data: invite, error: inviteError } = await supabase
+            // Check if barber is invited
+            const { data: inviteData, error: inviteError } = await supabase
                 .from('barber_invites')
                 .select('*')
                 .eq('code', inviteCode)
+                .eq('barber_email', email)
                 .maybeSingle();
 
-            if (inviteError || !invite) throw new Error('Invalid invite code');
+            if (inviteError) throw inviteError;
+            if (!inviteData) {
+                setError("Invalid invite code or email");
+                setLoading(false);
+                return;
+            }
 
             // Create user
             const { data, error: signUpError } = await supabase.auth.signUp({
@@ -199,19 +192,6 @@ function BarberSignUpForm({ onSwitch }: { onSwitch: () => void }) {
 
             if (signUpError) throw signUpError;
             if (!data.user) throw new Error('Failed to create user');
-
-            // Upload profile picture if provided
-            let profilePicUrl = '';
-            if (profilePic) {
-                const { data: uploadData, error: uploadError } = await supabase.storage
-                    .from('barber-profiles')
-                    .upload(`${Date.now()}-${profilePic.name}`, profilePic);
-                if (uploadError) throw uploadError;
-                const { data: { publicUrl } } = supabase.storage
-                    .from('barber-profiles')
-                    .getPublicUrl(uploadData.path);
-                profilePicUrl = publicUrl;
-            }
 
             // Create user profile
             const { error: profileError } = await supabase
@@ -230,21 +210,41 @@ function BarberSignUpForm({ onSwitch }: { onSwitch: () => void }) {
                 .from('barbers')
                 .insert({
                     user_id: data.user.id,
-                    barbershop_id: invite.barbershop_id,
                     name,
                     email,
-                    profile_pic: profilePicUrl
+                    barbershop_id: inviteData.barbershop_id
                 });
 
             if (barberError) throw barberError;
 
-            // Delete used invite code
-            // await supabase
-            //     .from('barber_invites')
-            //     .delete()
-            //     .eq('id', invite.id);
+            // Sign in immediately after signup
+            const { data: loginData, error: signInError } = await supabase.auth.signInWithPassword({
+                email,
+                password,
+            });
+            if (signInError) throw signInError;
 
-            await router.push('/barber-dashboard');
+            // Poll for barber profile (wait for DB/session propagation)
+            let found = false;
+            for (let i = 0; i < 10; i++) { // Try for up to ~5 seconds
+                await new Promise(res => setTimeout(res, 500));
+                const { data: { user: sessionUser } } = await supabase.auth.getUser();
+                if (!sessionUser) continue;
+                const { data: barber, error } = await supabase
+                    .from('barbers')
+                    .select('*')
+                    .eq('user_id', sessionUser.id)
+                    .maybeSingle();
+                if (barber && !error) {
+                    found = true;
+                    break;
+                }
+            }
+            if (found) {
+                await router.push('/barber-dashboard/calendar');
+            } else {
+                setError('Barber profile not found after sign-up. Please try logging in.');
+            }
         } catch (error: any) {
             setError(error.message);
         } finally {
@@ -310,36 +310,6 @@ function BarberSignUpForm({ onSwitch }: { onSwitch: () => void }) {
                 />
             </div>
 
-            <div>
-                <label className="block text-sm font-semibold text-black mb-1">
-                    Profile Picture (Optional)
-                </label>
-                <div className="mt-1 flex items-center space-x-4">
-                    {profilePicPreview ? (
-                        <img
-                            src={profilePicPreview}
-                            alt="Profile preview"
-                            className="h-12 w-12 rounded-full object-cover"
-                        />
-                    ) : (
-                        <div className="h-12 w-12 rounded-full bg-gray-700 flex items-center justify-center">
-                            <FaUser className="text-gray-400" />
-                        </div>
-                    )}
-                    <input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => handleProfilePicChange(e.target.files?.[0] || null)}
-                        className="block w-full text-sm text-gray-400
-                            file:mr-4 file:py-2 file:px-4
-                            file:rounded-md file:border-0
-                            file:text-sm file:font-semibold
-                            file:bg-purple-600 file:text-white
-                            hover:file:bg-purple-700"
-                    />
-                </div>
-            </div>
-
             {error && (
                 <div className="text-red-500 text-sm">{error}</div>
             )}
@@ -387,23 +357,34 @@ function BarberSignInForm({ onSwitch }: { onSwitch: () => void }) {
 
         setLoading(true);
         try {
-            const { error: signInError } = await supabase.auth.signInWithPassword({
+            // Sign in
+            const { data: { user }, error: signInError } = await supabase.auth.signInWithPassword({
                 email,
                 password,
             });
 
             if (signInError) throw signInError;
+            if (!user) throw new Error('Failed to sign in');
 
-            // Fetch authenticated user and log
-            const { data: { user } } = await supabase.auth.getUser();
-            console.log('Authenticated user after sign-in:', user);
-            if (!user) {
-                setError('Authentication failed after sign-in. Please try again.');
-                setLoading(false);
-                return;
+            // Poll for barber profile (wait for DB/session propagation)
+            let found = false;
+            for (let i = 0; i < 10; i++) { // Try for up to ~5 seconds
+                await new Promise(res => setTimeout(res, 500));
+                const { data: barber, error } = await supabase
+                    .from('barbers')
+                    .select('*')
+                    .eq('user_id', user.id)
+                    .maybeSingle();
+                if (barber && !error) {
+                    found = true;
+                    break;
+                }
             }
-
-            await router.push('/barber-dashboard');
+            if (found) {
+                await router.push('/barber-dashboard/calendar');
+            } else {
+                setError('No barber profile found. Please sign up with your invite code first.');
+            }
         } catch (error: any) {
             setError(error.message);
         } finally {

@@ -50,11 +50,23 @@ export async function bookAppointment(slot: BookingSlot, clientId: string): Prom
         minute: '2-digit'
     });
 
+    // Fetch client name and email from users table
+    const { data: user, error: userError } = await supabase
+        .from('users')
+        .select('name, email')
+        .eq('id', clientId)
+        .single();
+    if (userError || !user) {
+        throw new Error('Could not fetch client info');
+    }
+
     console.log('Booking appointment:', {
         date: appointmentDate,
         time: appointmentTime,
         barberId: slot.barber_id,
-        clientId: clientId
+        clientId: clientId,
+        clientName: user.name,
+        clientEmail: user.email
     });
 
     const { data, error } = await supabase
@@ -63,6 +75,8 @@ export async function bookAppointment(slot: BookingSlot, clientId: string): Prom
             {
                 barber_id: slot.barber_id,
                 client_id: clientId,
+                client_name: user.name,
+                client_email: user.email,
                 barbershop_id: slot.barbershop_id,
                 service_id: slot.service_id || null,
                 appointment_date: appointmentDate,

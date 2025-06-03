@@ -25,13 +25,14 @@ export default function ClientDashboard() {
     const [loadingUser, setLoadingUser] = useState(true);
     const [selectedCity, setSelectedCity] = useState<CityId | null>(null);
     const [recentVisit, setRecentVisit] = useState<any>(null);
+    const [favoriteBarbershopIds, setFavoriteBarbershopIds] = useState<string[]>([]);
 
     useEffect(() => {
         async function fetchBarbershops() {
             setLoading(true);
             let query = supabase.from('barbershops').select('*');
             if (selectedCity) {
-                query = query.eq('city_id', selectedCity);
+                query = query.eq('city', selectedCity);
             }
             const { data, error } = await query.order('id', { ascending: true });
             if (!error && data) {
@@ -64,6 +65,22 @@ export default function ClientDashboard() {
             setLoadingUser(false);
         }
         fetchUser();
+    }, []);
+
+    useEffect(() => {
+        async function fetchFavorites() {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+            const { data, error } = await supabase
+                .from('favorites')
+                .select('favorite_id')
+                .eq('user_id', user.id)
+                .eq('favorite_type', 'barbershop');
+            if (data) {
+                setFavoriteBarbershopIds(data.map(f => f.favorite_id));
+            }
+        }
+        fetchFavorites();
     }, []);
 
     const fetchRecentVisit = async () => {
@@ -149,8 +166,30 @@ export default function ClientDashboard() {
         }
     };
 
-    const toggleFavorite = (id: string) => {
-        setFavorites((prev) => ({ ...prev, [id]: !prev[id] }));
+    const handleToggleFavoriteBarbershop = async (barbershopId: string) => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+        const isFavorite = favoriteBarbershopIds.includes(barbershopId);
+        if (isFavorite) {
+            // Remove from favorites
+            await supabase
+                .from('favorites')
+                .delete()
+                .eq('user_id', user.id)
+                .eq('favorite_type', 'barbershop')
+                .eq('favorite_id', barbershopId);
+            setFavoriteBarbershopIds(ids => ids.filter(id => id !== barbershopId));
+        } else {
+            // Add to favorites
+            await supabase
+                .from('favorites')
+                .insert({
+                    user_id: user.id,
+                    favorite_type: 'barbershop',
+                    favorite_id: barbershopId,
+                });
+            setFavoriteBarbershopIds(ids => [...ids, barbershopId]);
+        }
     };
 
     return (
@@ -278,8 +317,8 @@ export default function ClientDashboard() {
                                         >
                                             <button
                                                 className={`absolute top-3 right-3 z-10 transition-transform duration-150 focus:outline-none group`}
-                                                onClick={e => { e.preventDefault(); toggleFavorite(shop.id); }}
-                                                aria-label={favorites[shop.id] ? "Sevimlilardan olib tashlash" : "Sevimlilarga qo'shish"}
+                                                onClick={e => { e.preventDefault(); handleToggleFavoriteBarbershop(shop.id); }}
+                                                aria-label={favoriteBarbershopIds.includes(shop.id) ? "Sevimlilardan olib tashlash" : "Sevimlilarga qo'shish"}
                                             >
                                                 <span
                                                     className={`
@@ -290,10 +329,10 @@ export default function ClientDashboard() {
                                                         transition-all duration-200
                                                         group-hover:scale-110
                                                         group-hover:bg-black/60
-                                                        ${favorites[shop.id] ? 'ring-2 ring-pink-400' : ''}
+                                                        ${favoriteBarbershopIds.includes(shop.id) ? 'ring-2 ring-pink-400' : ''}
                                                     `}
                                                 >
-                                                    {favorites[shop.id] ? (
+                                                    {favoriteBarbershopIds.includes(shop.id) ? (
                                                         <AiFillHeart className="text-pink-500 transition-colors duration-150" />
                                                     ) : (
                                                         <FiHeart className="text-gray-700 transition-colors duration-150" />

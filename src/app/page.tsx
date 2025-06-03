@@ -17,6 +17,10 @@ export default function Home() {
         setShowBarbershopOptions(false);
     }, []);
 
+    useEffect(() => {
+        console.log('videoReady:', videoReady, 'chairReady:', chairReady);
+    }, [videoReady, chairReady]);
+
     const handleTypeSelect = async (type: string) => {
         setIsNavigating(true);
         try {
@@ -41,37 +45,37 @@ export default function Home() {
     const handleBack = () => setShowBarbershopOptions(false);
 
     // Only show video and 3D chair when both are ready
-    const ready = videoReady && chairReady;
+    // const ready = videoReady && chairReady;
+    // For debugging, render video and 3D chair unconditionally
+    // Remove the ready && check temporarily
 
     return (
         <div className="min-h-screen w-full relative flex items-center justify-center">
             {/* Background Video */}
-            {ready && (
-                <video
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    src="/barbershop-bg.mp4"
-                    onCanPlayThrough={() => setVideoReady(true)}
-                    style={{
-                        position: 'fixed',
-                        top: 0,
-                        left: 0,
-                        width: '100vw',
-                        height: '100vh',
-                        objectFit: 'cover',
-                        zIndex: 0,
-                        pointerEvents: 'none',
-                    }}
-                />
-            )}
+            <video
+                autoPlay
+                loop
+                muted
+                playsInline
+                src="/barbershop-bg.mp4"
+                onCanPlayThrough={() => setVideoReady(true)}
+                style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    width: '100vw',
+                    height: '100vh',
+                    objectFit: 'cover',
+                    zIndex: 0,
+                    pointerEvents: 'none',
+                }}
+            />
             {/* 3D Animation Background */}
-            {ready && (
-                <div className="absolute inset-0 z-0 pointer-events-none">
-                    <TrimmerViewer onLoaded={() => setChairReady(true)} />
-                </div>
-            )}
+            <div className="absolute inset-0 z-0 pointer-events-none">
+                <TrimmerViewer onLoaded={() => setChairReady(true)} />
+            </div>
+            {/* Optional: Add a semi-transparent overlay for readability */}
+            <div className="absolute inset-0 bg-black/20 z-5 pointer-events-none" />
             {/* Logo */}
             <div className="absolute top-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center">
                 <div className="bg-yellow-400 rounded-full p-3 shadow-lg mb-2">

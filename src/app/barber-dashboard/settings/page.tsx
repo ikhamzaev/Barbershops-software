@@ -166,10 +166,14 @@ export default function BarberSettingsPage() {
     };
 
     return (
-        <div className="min-h-screen bg-white flex flex-col md:flex-row">
-            <BarberSidebarNav activeTab="settings" />
-            <div className="flex-1 flex flex-col h-screen md:ml-[5rem] ml-0 w-full bg-white">
-                <div className="w-full max-w-2xl mx-auto py-10 px-2 md:px-4 pb-40 md:pb-24">
+        <div className="min-h-screen flex bg-gray-50">
+            {/* Sidebar - solid dark, full height, flush left */}
+            <aside className="hidden md:flex flex-col w-56 bg-[#23272f] min-h-screen fixed left-0 top-0 bottom-0 z-40 shadow-lg">
+                <BarberSidebarNav activeTab="settings" />
+            </aside>
+            {/* Main content area, offset for sidebar */}
+            <main className="flex-1 flex flex-col items-center justify-start md:ml-56 w-full min-h-screen pb-24 bg-gray-50">
+                <div className="w-full max-w-2xl px-4 py-8">
                     <h1 className="text-2xl font-bold text-gray-900 mb-8">Barber Settings</h1>
                     {error && <div className="text-red-500 mb-4">{error}</div>}
 
@@ -245,7 +249,7 @@ export default function BarberSettingsPage() {
                     </div>
 
                     {/* Working Hours Section */}
-                    <div className="bg-white rounded-xl shadow p-4 md:p-6 mb-8 border border-gray-200 w-full">
+                    <div className="bg-white rounded-xl shadow p-6 mb-8 border border-gray-200 w-full">
                         <h2 className="text-lg font-semibold text-gray-900 mb-4">Working Hours</h2>
                         {loading ? (
                             <div className="text-center text-gray-400">Loading...</div>
@@ -293,26 +297,10 @@ export default function BarberSettingsPage() {
                             </>
                         )}
                     </div>
-
-                    {/* Placeholders for more settings */}
-                    <div className="bg-white rounded-xl shadow p-4 md:p-6 mb-8 border border-gray-200 w-full">
-                        <h2 className="text-lg font-semibold text-gray-900 mb-4">Other Settings (Coming Soon)</h2>
-                        <ul className="text-gray-500 list-disc pl-6 space-y-2">
-                            <li>Service List (add/edit services you offer)</li>
-                            <li>Gallery (upload your work/portfolio images)</li>
-                            <li>Notifications (booking alerts, etc.)</li>
-                            <li>Vacation Mode (set yourself unavailable for a period)</li>
-                            <li>Change Password</li>
-                        </ul>
-                    </div>
                 </div>
-                {/* Bottom nav for mobile (unchanged) */}
-                <div className="md:hidden fixed bottom-0 left-0 right-0 z-30">
-                    <BarberBottomNav activeTab="settings" />
-                </div>
-            </div>
-            {/* Bottom nav for desktop (unchanged) */}
-            <div className="hidden md:block">
+            </main>
+            {/* Bottom nav for mobile (unchanged) */}
+            <div className="md:hidden fixed bottom-0 left-0 right-0 z-30">
                 <BarberBottomNav activeTab="settings" />
             </div>
         </div>

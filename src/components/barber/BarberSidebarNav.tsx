@@ -13,15 +13,19 @@ const navItems = [
 export default function BarberSidebarNav({ activeTab }: { activeTab: string }) {
     const router = useRouter();
     return (
-        <aside className="hidden md:flex flex-col w-20 bg-[#23283a]/95 border-r border-gray-900 py-6 items-center gap-6 fixed left-0 top-16 h-[calc(100vh-4rem)] z-40 shadow-xl">
+        <aside className="hidden md:flex flex-col w-56 bg-[#18191A] min-h-screen fixed left-0 top-0 bottom-0 z-40 shadow-lg py-8 px-2">
             {navItems.map(item => (
                 <button
                     key={item.key}
                     onClick={() => router.push(`/barber-dashboard/${item.key === 'calendar' ? 'calendar' : item.key}`)}
-                    className={`flex flex-col items-center gap-1 p-3 rounded-xl transition-colors duration-200 ${activeTab === item.key ? 'bg-purple-100 text-purple-600' : 'text-gray-400 hover:bg-gray-100'}`}
+                    className={`flex items-center gap-3 w-full px-4 py-3 mb-1 rounded-lg transition-colors duration-200 text-left
+                        ${activeTab === item.key
+                            ? 'bg-[#23272f] text-white border-l-4 border-purple-500 font-semibold'
+                            : 'text-gray-300 hover:bg-[#23272f] hover:text-white'}
+                    `}
                 >
-                    <span className="text-2xl">{item.icon}</span>
-                    <span className="text-xs font-semibold">{item.label}</span>
+                    <span className="text-xl">{item.icon}</span>
+                    <span className="text-base">{item.label}</span>
                 </button>
             ))}
         </aside>
