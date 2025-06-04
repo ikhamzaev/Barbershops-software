@@ -2940,6 +2940,10 @@ video {
     margin-bottom: 0px;
   }
 
+  .md\:ml-64 {
+    margin-left: 16rem;
+  }
+
   .md\:block {
     display: block;
   }
@@ -3014,6 +3018,11 @@ video {
   .md\:px-0 {
     padding-left: 0px;
     padding-right: 0px;
+  }
+
+  .md\:py-6 {
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
   }
 
   .md\:pb-24 {

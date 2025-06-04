@@ -2,12 +2,12 @@ import { FaCalendarAlt, FaUsers, FaComments, FaChartBar, FaCog, FaCut } from 're
 import { useRouter } from 'next/navigation';
 
 const navItems = [
-    { key: 'calendar', label: 'Calendar', icon: <FaCalendarAlt /> },
-    { key: 'clients', label: 'Clients', icon: <FaUsers /> },
-    { key: 'services', label: 'Services', icon: <FaCut /> },
+    { key: 'calendar', label: 'Kalendar', icon: <FaCalendarAlt /> },
+    { key: 'clients', label: 'Mijozlar', icon: <FaUsers /> },
+    { key: 'services', label: 'Servislar', icon: <FaCut /> },
     { key: 'chat', label: 'Chat', icon: <FaComments /> },
-    { key: 'analytics', label: 'Analytics', icon: <FaChartBar /> },
-    { key: 'settings', label: 'Settings', icon: <FaCog /> },
+    { key: 'analytics', label: 'Analitikalar', icon: <FaChartBar /> },
+    { key: 'settings', label: 'Sozlamalar', icon: <FaCog /> },
 ];
 
 export default function BarberBottomNav({ activeTab }: { activeTab: string }) {

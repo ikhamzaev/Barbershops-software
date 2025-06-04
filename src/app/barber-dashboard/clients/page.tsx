@@ -60,14 +60,14 @@ export default function ClientsPage() {
     }, []);
 
     return (
-        <div className="h-screen bg-gray-50">
-            {/* Sidebar Navigation - fixed */}
-            <div className="fixed inset-y-0 left-0 w-64 z-30">
+        <div className="h-screen bg-gray-50 flex flex-col md:flex-row">
+            {/* Sidebar Navigation - fixed on desktop */}
+            <div className="hidden md:block fixed inset-y-0 left-0 w-64 z-30">
                 <BarberSidebarNav activeTab="clients" />
             </div>
-            {/* Main Content with left margin */}
-            <div className="ml-64 flex flex-col h-full overflow-hidden">
-                <div className="flex-1 overflow-y-auto px-4 py-6">
+            {/* Main Content: responsive margin and padding */}
+            <div className="flex-1 flex flex-col h-full overflow-hidden ml-0 md:ml-64 w-full">
+                <div className="flex-1 overflow-y-auto px-2 md:px-4 py-4 md:py-6 w-full max-w-3xl mx-auto">
                     <h1 className="text-2xl font-bold text-gray-900 mb-6 text-center flex items-center justify-center gap-2">
                         Mijozlar
                     </h1>
