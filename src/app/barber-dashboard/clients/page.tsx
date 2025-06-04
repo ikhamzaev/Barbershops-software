@@ -34,8 +34,8 @@ export default function ClientsPage() {
             // Group appointments by date
             const dateMap: Record<string, any[]> = {};
             appts.forEach(appt => {
-                let name = appt.client?.name || '';
-                let phone = appt.client?.phone || '';
+                let name = Array.isArray(appt.client) ? (appt.client as any[])[0]?.name || '' : (appt.client as any)?.name || '';
+                let phone = Array.isArray(appt.client) ? (appt.client as any[])[0]?.phone || '' : (appt.client as any)?.phone || '';
                 // For manual bookings, parse from notes if needed
                 if (!name && appt.notes && appt.notes.startsWith('Manual booking:')) {
                     const info = appt.notes.replace('Manual booking:', '').trim();

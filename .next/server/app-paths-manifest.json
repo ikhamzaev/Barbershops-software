@@ -1,7 +1,7 @@
 {
   "/barber-dashboard/calendar/page": "app/barber-dashboard/calendar/page.js",
-  "/barber-auth/page": "app/barber-auth/page.js",
   "/barber-dashboard/clients/page": "app/barber-dashboard/clients/page.js",
+  "/barber-auth/page": "app/barber-auth/page.js",
   "/barber-dashboard/services/page": "app/barber-dashboard/services/page.js",
   "/barber-dashboard/settings/page": "app/barber-dashboard/settings/page.js"
 }
