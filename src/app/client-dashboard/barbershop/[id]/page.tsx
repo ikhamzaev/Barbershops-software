@@ -144,21 +144,39 @@ export default function BarbershopPage() {
 
     return (
         <div className="min-h-screen bg-white flex flex-col items-center pb-8 px-4">
-            {/* Barbershop Info */}
+            {/* Barbershop Photo & Info Card */}
             <div className="w-full max-w-md mx-auto mt-6 mb-6">
                 <div className="rounded-2xl overflow-hidden shadow-lg mb-4">
-                    <img src={barbershop?.photo || '/images/barbershop-1.jpg'} alt={barbershop?.name || ''} className="w-full h-40 object-cover" />
+                    <img src={barbershop?.photo || barbershop?.photo_url || '/images/barbershop-1.jpg'} alt={barbershop?.name || ''} className="w-full h-48 object-cover" />
                 </div>
-                <div className="flex flex-col items-center">
-                    <h1 className="text-2xl font-bold text-gray-900 mb-1">{barbershop?.name || ''}</h1>
+                <div className="bg-white rounded-2xl shadow p-4 flex flex-col items-center border border-gray-100">
+                    <h1 className="text-2xl font-bold text-gray-900 mb-1 text-center">{barbershop?.name || ''}</h1>
                     <div className="flex items-center gap-2 text-yellow-600 font-semibold mb-1">
-                        ★ {barbershop?.rating || ''} <span className="text-gray-500 font-normal">({barbershop?.reviews || 0} sharh)</span>
-                        <span className="text-gray-400 ml-2">• {barbershop?.distance || ''}</span>
+                        ★ {barbershop?.rating || '5.0'}
+                        <span className="text-gray-500 font-normal">({barbershop?.reviews || 0} sharh)</span>
                     </div>
-                    <div className="text-gray-500 text-sm mb-2">{barbershop?.address || ''}</div>
+                    <div className="flex items-center gap-2 text-gray-500 text-sm mb-2">
+                        <span className="material-icons text-base align-middle">place</span>
+                        <span>{barbershop?.address || ''}</span>
+                    </div>
+                    {barbershop?.phone && (
+                        <div className="flex items-center gap-2 text-gray-500 text-sm mb-2">
+                            <span className="material-icons text-base align-middle">phone</span>
+                            <span>{barbershop.phone}</span>
+                        </div>
+                    )}
+                    {barbershop?.location && (
+                        <a
+                            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(barbershop.location)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 underline text-sm mb-2"
+                        >
+                            View on Map
+                        </a>
+                    )}
                 </div>
             </div>
-
             {/* Barber List */}
             <div className="w-full max-w-md mx-auto">
                 <h2 className="text-lg font-semibold text-gray-900 mb-4 text-center">Sartaroshni tanlang</h2>

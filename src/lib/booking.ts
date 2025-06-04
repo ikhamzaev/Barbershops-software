@@ -17,7 +17,7 @@ export interface Appointment {
     service_id?: string | null;
     appointment_date: string;
     appointment_time: string;
-    status: 'booked' | 'completed' | 'cancelled';
+    status: 'booked' | 'confirmed' | 'completed' | 'cancelled';
     notes?: string | null;
     created_at: string;
     barbers?: {

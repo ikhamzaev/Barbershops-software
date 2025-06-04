@@ -86,63 +86,44 @@ export default function AppointmentsPage() {
                     {upcoming.map((appointment) => (
                         <div
                             key={appointment.id}
-                            className="bg-white rounded-lg shadow p-6 border border-gray-200"
+                            className={`bg-white rounded-2xl shadow p-4 flex items-center justify-between ${appointment.status === 'cancelled' ? 'opacity-60 border border-red-300' : ''}`}
                         >
-                            {/* Date at the top */}
-                            <div className="flex items-center justify-between mb-2">
-                                <div className="text-sm font-semibold text-blue-700 flex items-center gap-2">
-                                    <FiCalendar className="inline-block" />
-                                    {format(new Date(appointment.appointment_date), 'MMM d, yyyy')}
-                                    <span className="ml-2 text-gray-500 font-normal">{appointment.appointment_time}</span>
+                            <div>
+                                <div className="text-gray-900 font-medium">
+                                    {appointment.services?.name || (Array.isArray(appointment.services) && appointment.services.length > 0 ? appointment.services.map(s => s.name).join(', ') : 'Service')}
                                 </div>
-                                <div
-                                    className={`px-3 py-1 rounded-full text-sm ${appointment.status === 'booked'
-                                        ? 'bg-green-100 text-green-800'
-                                        : appointment.status === 'cancelled'
-                                            ? 'bg-red-100 text-red-800'
-                                            : appointment.status === 'completed'
-                                                ? 'bg-gray-100 text-gray-800'
-                                                : 'bg-gray-100 text-gray-800'
-                                        }`}
-                                >
-                                    {appointment.status === 'booked' ? 'Faol' : appointment.status === 'cancelled' ? 'Bekor qilingan' : appointment.status === 'completed' ? 'Tugatildi' : 'Yakunlangan'}
+                                <div className="text-gray-500 text-sm flex items-center gap-2">
+                                    <FiCalendar /> {appointment.appointment_date} <FiClock /> {appointment.appointment_time}
                                 </div>
+                                <div className="text-gray-500 text-sm flex items-center gap-2">
+                                    <FiUser /> {appointment.barbers?.name || 'Barber'} <FiScissors /> {appointment.barbershops?.name || 'Barbershop'}
+                                </div>
+                                {appointment.status === 'cancelled' && (
+                                    <div className="mt-2 text-red-600 font-semibold flex items-center gap-2">
+                                        <FiXCircle className="inline" /> Cancelled by barber
+                                    </div>
+                                )}
                             </div>
-                            <div className="flex items-start space-x-4">
-                                <img
-                                    src={appointment.barbers?.photo_url || '/default-avatar.png'}
-                                    alt={appointment.barbers?.name}
-                                    className="w-12 h-12 rounded-full"
-                                />
-                                <div>
-                                    <h3 className="font-semibold text-lg">
-                                        {appointment.barbers?.name}
-                                    </h3>
-                                    <p className="text-gray-600">{appointment.barbershops?.name}</p>
-                                    <p className="text-sm text-gray-500">
-                                        {appointment.barbershops?.address}
-                                    </p>
-                                    {Array.isArray(appointment.services) && appointment.services.length > 0 && (
-                                        <div className="text-sm text-gray-600 mt-1">
-                                            {appointment.services.map((service: any, idx: number) => (
-                                                <div key={idx}>
-                                                    {service.name} ({service.duration} daqiqa, {service.price} so'm)
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                            {appointment.status === 'booked' && (
-                                <div className="mt-4 flex justify-end">
+                            <div className="flex flex-col items-end">
+                                <span className="text-xs text-gray-400 mb-1">
+                                    {appointment.appointment_time}
+                                </span>
+                                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${appointment.status === 'cancelled' ? 'bg-red-100 text-red-700' :
+                                        appointment.status === 'confirmed' ? 'bg-green-100 text-green-700' :
+                                            appointment.status === 'completed' ? 'bg-gray-100 text-gray-800' :
+                                                'bg-blue-100 text-blue-700'
+                                    }`}>
+                                    {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
+                                </span>
+                                {appointment.status !== 'cancelled' && (
                                     <button
+                                        className="mt-2 bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1 rounded text-xs font-semibold"
                                         onClick={() => handleCancelAppointment(appointment.id)}
-                                        className="text-red-600 hover:text-red-800 text-sm font-medium"
                                     >
-                                        Bekor qilish
+                                        Cancel
                                     </button>
-                                </div>
-                            )}
+                                )}
+                            </div>
                         </div>
                     ))}
                 </div>
@@ -157,7 +138,7 @@ export default function AppointmentsPage() {
                     {past.map((appointment) => (
                         <div
                             key={appointment.id}
-                            className="bg-gray-50 rounded-lg shadow p-6 border border-gray-100 opacity-80"
+                            className={`bg-gray-50 rounded-lg shadow p-6 border border-gray-100 opacity-80 ${appointment.status === 'cancelled' ? 'opacity-60 border border-red-300' : ''}`}
                         >
                             {/* Date at the top */}
                             <div className="flex items-center justify-between mb-2">
@@ -167,16 +148,18 @@ export default function AppointmentsPage() {
                                     <span className="ml-2 text-gray-500 font-normal">{appointment.appointment_time}</span>
                                 </div>
                                 <div
-                                    className={`px-3 py-1 rounded-full text-sm ${appointment.status === 'booked'
-                                        ? 'bg-green-100 text-green-800'
-                                        : appointment.status === 'cancelled'
-                                            ? 'bg-red-100 text-red-800'
-                                            : appointment.status === 'completed'
-                                                ? 'bg-gray-100 text-gray-800'
-                                                : 'bg-gray-100 text-gray-800'
+                                    className={`px-3 py-1 rounded-full text-sm ${appointment.status === 'booked' ? 'bg-green-100 text-green-800' :
+                                            appointment.status === 'confirmed' ? 'bg-green-100 text-green-700' :
+                                                appointment.status === 'cancelled' ? 'bg-red-100 text-red-800' :
+                                                    appointment.status === 'completed' ? 'bg-gray-100 text-gray-800' :
+                                                        'bg-gray-100 text-gray-800'
                                         }`}
                                 >
-                                    {appointment.status === 'booked' ? 'Faol' : appointment.status === 'cancelled' ? 'Bekor qilingan' : appointment.status === 'completed' ? 'Tugatildi' : 'Yakunlangan'}
+                                    {appointment.status === 'booked' ? 'Faol' :
+                                        appointment.status === 'confirmed' ? 'Tasdiqlangan' :
+                                            appointment.status === 'cancelled' ? 'Bekor qilingan' :
+                                                appointment.status === 'completed' ? 'Tugatildi' :
+                                                    'Yakunlangan'}
                                 </div>
                             </div>
                             <div className="flex items-start space-x-4">

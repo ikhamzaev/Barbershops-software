@@ -4,9 +4,10 @@ import BarberSidebarNav from '@/components/barber/BarberSidebarNav';
 import BarberBottomNav from '@/components/barber/BarberBottomNav';
 import { supabase } from '@/lib/supabaseClient';
 
+type ClientsGrouped = { dateMap: Record<string, any[]>; sortedDates: string[] };
 export default function ClientsPage() {
     const [search, setSearch] = useState('');
-    const [clients, setClients] = useState<any[]>([]);
+    const [clients, setClients] = useState<ClientsGrouped>({ dateMap: {}, sortedDates: [] });
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -21,90 +22,104 @@ export default function ClientsPage() {
                 .eq('user_id', user.id)
                 .single();
             if (!barberData) return setLoading(false);
-            // Fetch all appointments for this barber, join client
+            // Fetch all appointments for this barber (not cancelled)
             const { data: appts, error: apptError } = await supabase
                 .from('appointments')
-                .select('id, appointment_date, appointment_time, client:client_id(id, name, phone)')
+                .select('id, appointment_date, appointment_time, status, client:client_id(id, name, phone), notes')
                 .eq('barber_id', barberData.id)
+                .neq('status', 'cancelled')
                 .order('appointment_date', { ascending: false })
                 .order('appointment_time', { ascending: false });
             if (!appts) return setLoading(false);
-            // Group by client id, get last visit
-            const clientMap: Record<string, any> = {};
-            appts.forEach((appt: any) => {
-                if (!appt.client) return;
-                const cid = appt.client.id;
-                if (!clientMap[cid] || new Date(appt.appointment_date + 'T' + appt.appointment_time) > new Date(clientMap[cid].lastVisit + 'T' + clientMap[cid].time)) {
-                    clientMap[cid] = {
-                        id: cid,
-                        name: appt.client.name,
-                        phone: appt.client.phone,
-                        lastVisit: appt.appointment_date,
-                        time: appt.appointment_time,
-                    };
+            // Group appointments by date
+            const dateMap: Record<string, any[]> = {};
+            appts.forEach(appt => {
+                let name = appt.client?.name || '';
+                let phone = appt.client?.phone || '';
+                // For manual bookings, parse from notes if needed
+                if (!name && appt.notes && appt.notes.startsWith('Manual booking:')) {
+                    const info = appt.notes.replace('Manual booking:', '').trim();
+                    const [parsedName, parsedPhone] = info.split(',').map((s: any) => s.trim());
+                    name = parsedName || 'Unknown';
+                    phone = parsedPhone || '';
                 }
+                if (!dateMap[appt.appointment_date]) dateMap[appt.appointment_date] = [];
+                dateMap[appt.appointment_date].push({
+                    name,
+                    phone,
+                    time: appt.appointment_time,
+                    id: appt.id
+                });
             });
-            setClients(Object.values(clientMap));
+            // Sort dates descending
+            const sortedDates = Object.keys(dateMap).sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+            setClients({ dateMap, sortedDates });
             setLoading(false);
         }
         fetchClients();
     }, []);
 
-    function groupByDate(clients: any[]) {
-        return clients.reduce((acc: Record<string, any[]>, client) => {
-            if (!acc[client.lastVisit]) acc[client.lastVisit] = [];
-            acc[client.lastVisit].push(client);
-            return acc;
-        }, {});
-    }
-
-    const grouped = groupByDate(
-        clients.filter(c =>
-            c.name.toLowerCase().includes(search.toLowerCase()) ||
-            (c.phone && c.phone.toLowerCase().includes(search.toLowerCase()))
-        )
-    );
-    const sortedDates = Object.keys(grouped).sort((a, b) => b.localeCompare(a));
-
     return (
-        <div className="min-h-screen bg-gradient-to-br from-[#f8fafc] to-[#e0e7ff] flex">
-            <BarberSidebarNav activeTab="clients" />
-            <div className="flex-1 flex flex-col items-center px-2 pb-24 md:ml-20">
-                <div className="w-full max-w-2xl mt-6 mb-4">
-                    <h2 className="text-2xl font-bold text-gray-800 mb-2">Clients</h2>
-                    <input
-                        type="text"
-                        value={search}
-                        onChange={e => setSearch(e.target.value)}
-                        placeholder="Search by name or phone"
-                        className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-base focus:border-purple-400 focus:ring-2 focus:ring-purple-100 outline-none mb-4"
-                    />
-                </div>
-                <div className="w-full max-w-2xl bg-white rounded-2xl shadow p-0 divide-y divide-gray-100">
-                    {loading && <div className="text-gray-400 text-center py-8">Loading clients...</div>}
-                    {!loading && sortedDates.length === 0 && (
-                        <div className="text-gray-400 text-center py-8">No clients found.</div>
-                    )}
-                    {sortedDates.map(date => (
-                        <div key={date} className="py-2">
-                            <div className="text-xs font-semibold text-gray-400 px-6 py-2">{formatDate(date)}</div>
-                            {grouped[date].map(client => (
-                                <div key={client.id} className="flex items-center gap-4 px-6 py-3 hover:bg-gray-50 transition">
-                                    <div className="h-10 w-10 rounded-full flex items-center justify-center font-bold text-white text-lg" style={{ background: stringToColor(client.name) }}>
-                                        {getInitials(client.name)}
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <div className="font-semibold text-gray-800 truncate">{client.name}</div>
-                                        <div className="text-gray-500 text-sm truncate">{client.phone}</div>
-                                    </div>
-                                    <div className="text-xs text-gray-400 font-semibold ml-2 whitespace-nowrap">{client.time}</div>
-                                </div>
-                            ))}
-                        </div>
-                    ))}
-                </div>
+        <div className="h-screen bg-gray-50">
+            {/* Sidebar Navigation - fixed */}
+            <div className="fixed inset-y-0 left-0 w-64 z-30">
+                <BarberSidebarNav activeTab="clients" />
             </div>
-            <BarberBottomNav activeTab="clients" />
+            {/* Main Content with left margin */}
+            <div className="ml-64 flex flex-col h-full overflow-hidden">
+                <div className="flex-1 overflow-y-auto px-4 py-6">
+                    <h1 className="text-2xl font-bold text-gray-900 mb-6 text-center flex items-center justify-center gap-2">
+                        Mijozlar
+                    </h1>
+                    {/* Search Input */}
+                    <div className="max-w-md mx-auto mb-8">
+                        <input
+                            type="text"
+                            placeholder="Ism yoki telefon raqami bo'yicha qidiring..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent"
+                        />
+                    </div>
+                    {loading ? (
+                        <div className="text-gray-400 text-center mt-6">Yuklanmoqda...</div>
+                    ) : (clients.sortedDates.length === 0) ? (
+                        <div className="text-gray-400 text-center mt-6">Mijozlar topilmadi.</div>
+                    ) : (
+                        <div className="flex flex-col gap-8">
+                            {clients.sortedDates.map((date: string) => {
+                                // Filter appointments for this date by search
+                                const filtered = clients.dateMap[date].filter((client: any) =>
+                                    client.name.toLowerCase().includes(search.toLowerCase()) ||
+                                    (client.phone && client.phone.toLowerCase().includes(search.toLowerCase()))
+                                );
+                                if (filtered.length === 0) return null;
+                                return (
+                                    <div key={date} className="">
+                                        <div className="text-lg font-bold text-purple-700 mb-3 pl-1">
+                                            {formatDateUz(date)}
+                                        </div>
+                                        <div className="flex flex-col gap-3">
+                                            {filtered.map((client: any, idx: number) => (
+                                                <div key={client.id} className="flex items-center gap-4 bg-white border-l-4 border-purple-400 rounded-lg px-4 py-3 shadow-sm">
+                                                    <div className="flex-1">
+                                                        <div className="font-semibold text-gray-900 text-base">{client.name}</div>
+                                                        <div className="text-gray-500 text-sm">{client.phone}</div>
+                                                    </div>
+                                                    <div className="text-purple-700 font-bold text-lg">{client.time}</div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+                </div>
+
+                {/* Bottom Navigation */}
+                <BarberBottomNav activeTab="clients" />
+            </div>
         </div>
     );
 }
@@ -123,12 +138,18 @@ function stringToColor(str: string) {
     return `hsl(${h}, 70%, 70%)`;
 }
 
-function formatDate(dateStr: string) {
+// Uzbek date formatter
+function formatDateUz(dateStr: string) {
     const d = new Date(dateStr);
     const today = new Date();
     const yesterday = new Date();
     yesterday.setDate(today.getDate() - 1);
-    if (d.toDateString() === today.toDateString()) return 'Today';
-    if (d.toDateString() === yesterday.toDateString()) return 'Yesterday';
-    return d.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' });
+    if (d.toDateString() === today.toDateString()) return 'Bugun';
+    if (d.toDateString() === yesterday.toDateString()) return 'Kecha';
+    // Uzbek weekdays and months
+    const weekdays = ['Yakshanba', 'Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba', 'Juma', 'Shanba'];
+    const months = ['yanvar', 'fevral', 'mart', 'aprel', 'may', 'iyun', 'iyul', 'avgust', 'sentyabr', 'oktyabr', 'noyabr', 'dekabr'];
+    const weekday = weekdays[d.getDay()];
+    const month = months[d.getMonth()];
+    return `${weekday}, ${d.getDate()}-${month} ${d.getFullYear()} yil`;
 } 

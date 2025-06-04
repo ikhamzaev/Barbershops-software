@@ -22,6 +22,7 @@ export default function ClientDashboard() {
     const [loading, setLoading] = useState(true);
     const [favorites, setFavorites] = useState<{ [id: string]: boolean }>({});
     const [user, setUser] = useState<any>(null);
+    const [userProfile, setUserProfile] = useState<any>(null);
     const [loadingUser, setLoadingUser] = useState(true);
     const [selectedCity, setSelectedCity] = useState<CityId | null>(null);
     const [recentVisit, setRecentVisit] = useState<any>(null);
@@ -51,15 +52,18 @@ export default function ClientDashboard() {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) {
                 setLoadingUser(false);
+                console.log('No user found in supabase.auth.getUser()'); // Debug log
                 return;
             }
+            setUser(user);
             const { data } = await supabase
                 .from('users')
                 .select('name, city_id')
                 .eq('id', user.id)
                 .single();
             if (data) {
-                setUser(data);
+                setUserProfile(data);
+                console.log('User profile set in dashboard:', data); // Debug log
                 if (data.city_id) {
                     setSelectedCity(data.city_id as CityId);
                 }
@@ -87,16 +91,24 @@ export default function ClientDashboard() {
 
     useEffect(() => {
         async function fetchUpcomingAppointments() {
-            if (!user) return;
-            const all = await getAppointmentsByClient(user.id);
-            const now = new Date();
-            const upcoming = all.filter(a => {
-                const [year, month, day] = a.appointment_date.split('-').map(Number);
-                const [hours, minutes] = a.appointment_time.split(':').map(Number);
-                const apptDate = new Date(year, month - 1, day, hours, minutes);
-                return apptDate >= now;
-            });
-            setUpcomingAppointments(upcoming);
+            try {
+                if (!user) {
+                    console.log('No user, skipping fetchUpcomingAppointments'); // Debug log
+                    return;
+                }
+                const all = await getAppointmentsByClient(user.id);
+                console.log('All appointments for notifications:', all); // Debug log
+                const now = new Date();
+                const upcoming = all.filter(a => {
+                    const [year, month, day] = a.appointment_date.split('-').map(Number);
+                    const [hours, minutes] = a.appointment_time.split(':').map(Number);
+                    const apptDate = new Date(year, month - 1, day, hours, minutes);
+                    return (a.status === 'booked' || a.status === 'completed') && apptDate >= now;
+                });
+                setUpcomingAppointments(upcoming);
+            } catch (err) {
+                console.error('Error in fetchUpcomingAppointments:', err);
+            }
         }
         fetchUpcomingAppointments();
     }, [user]);
@@ -405,7 +417,7 @@ export default function ClientDashboard() {
                                                         </span>
                                                     </div>
                                                     <div className="text-gray-400 text-xs mb-1 flex items-center gap-1">
-                                                        <span className="material-icons text-sm">place</span> {shop.address || ''}
+                                                        <span className="font-semibold">manzil:</span> {shop.address || ''}
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center justify-between mt-2">

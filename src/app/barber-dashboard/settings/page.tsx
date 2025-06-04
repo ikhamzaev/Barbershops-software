@@ -7,19 +7,19 @@ import { FaEdit, FaSave, FaTimes, FaCamera } from "react-icons/fa";
 import { supabase } from "@/lib/supabaseClient";
 
 const DAYS = [
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-    "Sunday",
+    "Dushanba",
+    "Seshanba",
+    "Chorshanba",
+    "Payshanba",
+    "Juma",
+    "Shanba",
+    "Yakshanba",
 ];
 
 export default function BarberSettingsPage() {
     const [profile, setProfile] = useState({
-        name: "Your Name",
-        bio: "Short bio about yourself...",
+        name: "Ismingiz",
+        bio: "Oʻzingiz haqingizda qisqacha maʼlumot...",
         photo: "",
         email: "",
     });
@@ -64,8 +64,8 @@ export default function BarberSettingsPage() {
             // 4. Merge data: prefer barbers, fallback to users
             setBarberId(barberData?.id || null);
             setProfile({
-                name: barberData?.name || userRow?.name || "Your Name",
-                bio: barberData?.bio || "Short bio about yourself...",
+                name: barberData?.name || userRow?.name || "Ismingiz",
+                bio: barberData?.bio || "Oʻzingiz haqingizda qisqacha maʼlumot...",
                 photo: barberData?.photo_url || userRow?.photo || "",
                 email: barberData?.email || userRow?.email || userData.user.email || "",
             });
@@ -174,12 +174,12 @@ export default function BarberSettingsPage() {
             {/* Main content area, offset for sidebar */}
             <main className="flex-1 flex flex-col items-center justify-start md:ml-56 w-full min-h-screen pb-24 bg-gray-50">
                 <div className="w-full max-w-2xl px-4 py-8">
-                    <h1 className="text-2xl font-bold text-gray-900 mb-8">Barber Settings</h1>
+                    <h1 className="text-2xl font-bold text-gray-900 mb-8">Sozlamalar</h1>
                     {error && <div className="text-red-500 mb-4">{error}</div>}
 
                     {/* Profile Section */}
                     <div className="bg-white rounded-xl shadow p-4 md:p-6 mb-8 border border-gray-200 w-full">
-                        <h2 className="text-lg font-semibold text-gray-900 mb-4">Profile</h2>
+                        <h2 className="text-lg font-semibold text-gray-900 mb-4">Profil</h2>
                         <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6 mb-4">
                             <div className="relative">
                                 <img
@@ -206,7 +206,12 @@ export default function BarberSettingsPage() {
                                     </div>
                                 ) : (
                                     <div className="flex gap-2 items-center w-full">
-                                        <span className="text-gray-900 font-semibold text-lg">{profile.name}</span>
+                                        <input
+                                            type="text"
+                                            value={profile.name}
+                                            readOnly
+                                            className="font-bold text-xl text-gray-900 bg-transparent border-none outline-none"
+                                        />
                                         <button onClick={() => handleEdit("name")} className="text-gray-400"><FaEdit /></button>
                                     </div>
                                 )}
@@ -223,7 +228,7 @@ export default function BarberSettingsPage() {
                                     </div>
                                 ) : (
                                     <div className="flex gap-2 items-center mt-2 w-full">
-                                        <span className="text-gray-500 text-sm">{profile.bio}</span>
+                                        <span className="text-gray-500">{profile.bio}</span>
                                         <button onClick={() => handleEdit("bio")} className="text-gray-400"><FaEdit /></button>
                                     </div>
                                 )}
@@ -240,7 +245,7 @@ export default function BarberSettingsPage() {
                                     </div>
                                 ) : (
                                     <div className="flex gap-2 items-center mt-2 w-full">
-                                        <span className="text-gray-500 text-sm">{profile.email}</span>
+                                        <span className="text-gray-500">{profile.email}</span>
                                         <button onClick={() => handleEdit("email")} className="text-gray-400"><FaEdit /></button>
                                     </div>
                                 )}
@@ -249,8 +254,8 @@ export default function BarberSettingsPage() {
                     </div>
 
                     {/* Working Hours Section */}
-                    <div className="bg-white rounded-xl shadow p-6 mb-8 border border-gray-200 w-full">
-                        <h2 className="text-lg font-semibold text-gray-900 mb-4">Working Hours</h2>
+                    <div className="bg-white rounded-xl shadow p-4 md:p-6 border border-gray-200 w-full">
+                        <h2 className="text-lg font-semibold text-gray-900 mb-4">Ish vaqtlari</h2>
                         {loading ? (
                             <div className="text-center text-gray-400">Loading...</div>
                         ) : (
@@ -265,7 +270,7 @@ export default function BarberSettingsPage() {
                                                     onChange={() => handleDayToggle(idx)}
                                                     className="form-checkbox h-5 w-5 text-purple-600"
                                                 />
-                                                <span className="text-gray-900 w-24">{d.day}</span>
+                                                <span className="font-semibold text-gray-900 w-24">{d.day}</span>
                                             </label>
                                             <div className="flex gap-2 w-full md:w-auto">
                                                 <input
@@ -275,7 +280,7 @@ export default function BarberSettingsPage() {
                                                     onChange={(e) => handleTimeChange(idx, "start", e.target.value)}
                                                     className="rounded-md border-gray-300 bg-white text-gray-900 px-2 py-1 focus:ring-2 focus:ring-purple-600 disabled:opacity-50 w-full md:w-auto"
                                                 />
-                                                <span className="text-gray-500">to</span>
+                                                <span className="text-gray-500 text-xs">Boshlanishi</span>
                                                 <input
                                                     type="time"
                                                     value={d.end}
@@ -283,16 +288,16 @@ export default function BarberSettingsPage() {
                                                     onChange={(e) => handleTimeChange(idx, "end", e.target.value)}
                                                     className="rounded-md border-gray-300 bg-white text-gray-900 px-2 py-1 focus:ring-2 focus:ring-purple-600 disabled:opacity-50 w-full md:w-auto"
                                                 />
+                                                <span className="text-gray-500 text-xs">Tugashi</span>
                                             </div>
                                         </div>
                                     ))}
                                 </div>
                                 <button
                                     onClick={handleSaveWorkingHours}
-                                    className="mt-6 bg-purple-600 hover:bg-purple-700 text-white font-semibold px-6 py-2 rounded-xl shadow transition w-full md:w-auto"
-                                    disabled={loading}
+                                    className="mt-4 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700"
                                 >
-                                    {loading ? "Saving..." : "Save Working Hours"}
+                                    Ish vaqtlarini saqlash
                                 </button>
                             </>
                         )}

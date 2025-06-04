@@ -67,6 +67,12 @@ export default function FavoritesPage() {
         fetchFavorites();
     }, []);
 
+    useEffect(() => {
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            console.log('Supabase session:', session);
+        });
+    }, []);
+
     // Refresh favorites for external use
     function refreshFavorites() {
         fetchFavorites();

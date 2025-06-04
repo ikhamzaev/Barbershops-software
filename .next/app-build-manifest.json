@@ -106,6 +106,28 @@
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/barbershop-onboarding/page.js"
+    ],
+    "/barbershop-dashboard/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/barbershop-dashboard/page.css",
+      "static/chunks/app/barbershop-dashboard/page.js"
+    ],
+    "/barbershop-dashboard/settings/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/barbershop-dashboard/settings/page.js"
+    ],
+    "/barbershop-dashboard/barbers/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/barbershop-dashboard/barbers/page.js"
+    ],
+    "/barbershop-dashboard/availability/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/barbershop-dashboard/availability/page.css",
+      "static/chunks/app/barbershop-dashboard/availability/page.js"
     ]
   }
 }

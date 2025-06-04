@@ -76,16 +76,16 @@ export default function BarberAnalyticsPage() {
                     <FiArrowLeft className="text-lg" /> Asosiyga qaytish
                 </button>
                 {/* Summary KPIs */}
-                <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4 px-4 md:px-10">
+                <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4 px-2 sm:px-4 md:px-10">
                     <div>
                         <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
                             <FiBarChart2 className="text-blue-500" /> Analitika
                         </h1>
-                        <div className="text-gray-500 mt-1">{selectedMonth} oyi uchun umumiy ko'rsatkichlar</div>
+                        <div className="text-gray-500 mt-1 text-sm">{selectedMonth} oyi uchun umumiy ko'rsatkichlar</div>
                     </div>
                     <div className="flex items-center gap-2">
                         <select
-                            className="bg-white border border-gray-200 rounded-lg px-3 py-1 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                            className="bg-white border border-gray-200 rounded-lg px-3 py-1 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm"
                             value={selectedMonth}
                             onChange={e => setSelectedMonth(e.target.value)}
                         >
@@ -105,24 +105,24 @@ export default function BarberAnalyticsPage() {
                         <span className="text-gray-400">📅</span>
                     </div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-                    <div className="bg-white rounded-2xl shadow p-6 flex flex-col items-center">
-                        <span className="text-3xl font-bold text-green-500">{summary.revenue.toLocaleString()} so'm</span>
-                        <span className="text-gray-500 mt-1">Umumiy daromad</span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mb-10 px-2 sm:px-4 md:px-0">
+                    <div className="bg-white rounded-2xl shadow p-4 flex flex-col items-center">
+                        <span className="text-2xl md:text-3xl font-bold text-green-500">{summary.revenue.toLocaleString()} so'm</span>
+                        <span className="text-gray-500 mt-1 text-sm">Umumiy daromad</span>
                     </div>
-                    <div className="bg-white rounded-2xl shadow p-6 flex flex-col items-center">
-                        <span className="text-3xl font-bold text-blue-500">{summary.appointments}</span>
-                        <span className="text-gray-500 mt-1">Umumiy bronlar</span>
+                    <div className="bg-white rounded-2xl shadow p-4 flex flex-col items-center">
+                        <span className="text-2xl md:text-3xl font-bold text-blue-500">{summary.appointments}</span>
+                        <span className="text-gray-500 mt-1 text-sm">Umumiy bronlar</span>
                     </div>
-                    <div className="bg-white rounded-2xl shadow p-6 flex flex-col items-center">
-                        <span className="text-3xl font-bold text-purple-500">{summary.avgPerAppointment.toLocaleString()} so'm</span>
-                        <span className="text-gray-500 mt-1">O'rtacha bron uchun</span>
+                    <div className="bg-white rounded-2xl shadow p-4 flex flex-col items-center">
+                        <span className="text-2xl md:text-3xl font-bold text-purple-500">{summary.avgPerAppointment.toLocaleString()} so'm</span>
+                        <span className="text-gray-500 mt-1 text-sm">O'rtacha bron uchun</span>
                     </div>
                 </div>
                 {/* Revenue Bar Chart */}
-                <div className="bg-white rounded-2xl shadow-lg p-6 mb-10">
+                <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 mb-10 overflow-x-auto">
                     <h2 className="text-lg font-semibold text-gray-800 mb-4">So'nggi 14 kunlik daromad</h2>
-                    <div className="w-full h-64 flex items-end relative">
+                    <div className="w-[600px] sm:w-full h-64 flex items-end relative">
                         {/* Y-axis line */}
                         <div className="absolute left-0 top-0 bottom-0 flex flex-col justify-between h-full z-10">
                             {revenueTickValues.slice().reverse().map((val, i) => (
@@ -193,9 +193,9 @@ export default function BarberAnalyticsPage() {
                     </div>
                 </div>
                 {/* Appointments Bar Chart */}
-                <div className="bg-white rounded-2xl shadow-lg p-6 mb-10">
+                <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 mb-10 overflow-x-auto">
                     <h2 className="text-lg font-semibold text-gray-800 mb-4">So'nggi 14 kunlik bronlar</h2>
-                    <div className="w-full h-64 flex items-end relative">
+                    <div className="w-[600px] sm:w-full h-64 flex items-end relative">
                         {/* Y-axis labels */}
                         <div className="absolute left-0 top-0 bottom-0 flex flex-col justify-between h-full z-10">
                             {appointmentsTickValues.slice().reverse().map((val, i) => (
@@ -266,18 +266,18 @@ export default function BarberAnalyticsPage() {
                     </div>
                 </div>
                 {/* Top Services */}
-                <div className="bg-white rounded-2xl shadow-lg p-6 mb-10">
+                <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 mb-10">
                     <h2 className="text-lg font-semibold text-gray-800 mb-4">Eng ko'p buyurtma qilingan xizmatlar</h2>
                     <div className="space-y-3">
                         {topServices.map((s, i) => (
-                            <div key={i} className="flex items-center gap-3">
+                            <div key={i} className="flex flex-col sm:flex-row items-center gap-3">
                                 <div className="w-40 flex items-center">
                                     <span className="text-xl text-blue-400 mr-2">
                                         {s.name === "Soch olish" ? <FiScissors /> : s.name === "Soqol olish" ? <FiUser /> : <FiTrendingUp />}
                                     </span>
                                     <span className="text-gray-700">{s.name}</span>
                                 </div>
-                                <div className="flex-1 h-3 bg-gray-100 rounded-full">
+                                <div className="flex-1 h-3 bg-gray-100 rounded-full w-full max-w-xs">
                                     <div
                                         className="h-3 rounded-full bg-blue-400"
                                         style={{ width: `${(s.count / topServices[0].count) * 100}%` }}
@@ -289,7 +289,7 @@ export default function BarberAnalyticsPage() {
                     </div>
                 </div>
                 {/* Insights Section */}
-                <div className="bg-white rounded-2xl shadow-lg p-6 flex flex-col md:flex-row gap-8 items-center justify-between">
+                <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 flex flex-col sm:flex-row gap-6 items-center justify-between mb-10">
                     <div className="flex flex-col items-center">
                         <span className="text-gray-500">Eng band kun (so'nggi 2 hafta):</span>
                         <span className="font-bold text-blue-500 text-lg mt-1">{busiestDay.date.toLocaleDateString('uz-UZ')}</span>

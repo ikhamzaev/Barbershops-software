@@ -246,18 +246,18 @@ export default function BarberServicesPage() {
 
             <div className="p-4 max-w-4xl mx-auto">
                 <div className="flex justify-between items-center mb-6">
-                    <h1 className="text-2xl font-bold text-gray-900">My Services</h1>
+                    <h1 className="text-2xl font-bold text-gray-900">Mening xizmatlarim</h1>
                     <button
                         onClick={() => setShowAddModal(true)}
                         className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700"
                     >
-                        Add Service
+                        Xizmat qoʼshish
                     </button>
                 </div>
 
                 {/* Standard Services Section */}
                 <div className="mb-8">
-                    <h2 className="text-lg font-semibold text-gray-900 mb-4">Available Standard Services</h2>
+                    <h2 className="text-lg font-semibold text-gray-900 mb-4">Standart xizmatlar</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {standardServices.map(service => {
                             const isAdded = barberServices.some(
@@ -272,17 +272,17 @@ export default function BarberServicesPage() {
                                     <h3 className="font-semibold text-gray-900">{service.name}</h3>
                                     <p className="text-sm text-gray-600 mb-2">{service.description}</p>
                                     <div className="text-sm text-gray-500 mb-2">
-                                        Duration: {service.default_duration} minutes
+                                        Davomiyligi: {service.default_duration} daqiqa
                                     </div>
                                     <div className="text-sm text-gray-500 mb-4">
-                                        Price: ${service.default_price}
+                                        Narxi: ${service.default_price}
                                     </div>
                                     {!isAdded && (
                                         <button
                                             onClick={() => handleAddStandardService(service)}
                                             className="w-full bg-purple-600 text-white px-3 py-1 rounded hover:bg-purple-700 font-semibold flex items-center justify-center gap-2"
                                         >
-                                            <FaCut className="mr-1" /> Add & Customize
+                                            <FaCut className="mr-1" /> Qoʼshish va sozlash
                                         </button>
                                     )}
                                 </div>
@@ -293,7 +293,7 @@ export default function BarberServicesPage() {
 
                 {/* My Services Section */}
                 <div>
-                    <h2 className="text-lg font-semibold text-gray-900 mb-4">My Services</h2>
+                    <h2 className="text-lg font-semibold text-gray-900 mb-4">Mening xizmatlarim</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {barberServices.map(service => (
                             <div
@@ -305,16 +305,16 @@ export default function BarberServicesPage() {
                                         <FaCut className="text-purple-400" />
                                         <h3 className="font-semibold text-gray-900 text-lg">{service.name}</h3>
                                     </div>
-                                    <span className={`px-2 py-1 rounded text-xs font-bold ${service.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>{service.is_active ? 'Active' : 'Inactive'}</span>
+                                    <span className={`px-2 py-1 rounded text-xs font-bold ${service.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>{service.is_active ? 'Faol' : 'Nofaol'}</span>
                                 </div>
                                 <p className="text-sm text-gray-600 mb-1">{service.description}</p>
                                 <div className="flex justify-between text-sm text-gray-500 mb-2">
-                                    <span>Duration: <span className="font-semibold text-gray-800">{service.duration} min</span></span>
-                                    <span>Price: <span className="font-semibold text-purple-600">${service.price}</span></span>
+                                    <span>Davomiyligi: <span className="font-semibold text-gray-800">{service.duration} daqiqa</span></span>
+                                    <span>Narxi: <span className="font-semibold text-purple-600">${service.price}</span></span>
                                 </div>
                                 <div className="flex gap-2 mt-2">
-                                    <button onClick={() => setEditingService(service)} className="flex-1 bg-gray-100 text-gray-700 px-3 py-1 rounded hover:bg-gray-200 flex items-center gap-1"><FaEdit /> Edit</button>
-                                    <button onClick={() => handleDeleteService(service.id)} className="flex-1 bg-red-100 text-red-700 px-3 py-1 rounded hover:bg-red-200 flex items-center gap-1"><FaTrash /> Delete</button>
+                                    <button onClick={() => setEditingService(service)} className="flex-1 bg-gray-100 text-gray-700 px-3 py-1 rounded hover:bg-gray-200 flex items-center gap-1"><FaEdit /> Tahrirlash</button>
+                                    <button onClick={() => handleDeleteService(service.id)} className="flex-1 bg-red-100 text-red-700 px-3 py-1 rounded hover:bg-red-200 flex items-center gap-1"><FaTrash /> Oʻchirish</button>
                                 </div>
                             </div>
                         ))}
@@ -326,7 +326,7 @@ export default function BarberServicesPage() {
             {showAddModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
                     <div className="bg-white rounded-lg p-6 max-w-md w-full">
-                        <h2 className="text-xl font-bold mb-4">Add Custom Service</h2>
+                        <h2 className="text-xl font-bold mb-4">Maxsus xizmat qoʼshish</h2>
                         <form onSubmit={(e) => {
                             e.preventDefault();
                             const formData = new FormData(e.currentTarget);
@@ -340,7 +340,7 @@ export default function BarberServicesPage() {
                         }}>
                             <div className="mb-4">
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Service Name
+                                    Xizmat nomi
                                 </label>
                                 <input
                                     type="text"
@@ -351,7 +351,7 @@ export default function BarberServicesPage() {
                             </div>
                             <div className="mb-4">
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Description
+                                    Tavsif
                                 </label>
                                 <textarea
                                     name="description"
@@ -360,7 +360,7 @@ export default function BarberServicesPage() {
                             </div>
                             <div className="mb-4">
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Duration (minutes)
+                                    Davomiyligi (daqiqa)
                                 </label>
                                 <input
                                     type="number"
@@ -372,7 +372,7 @@ export default function BarberServicesPage() {
                             </div>
                             <div className="mb-4">
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Price ($)
+                                    Narxi ($)
                                 </label>
                                 <input
                                     type="number"
@@ -389,13 +389,13 @@ export default function BarberServicesPage() {
                                     onClick={() => setShowAddModal(false)}
                                     className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
                                 >
-                                    Cancel
+                                    Bekor qilish
                                 </button>
                                 <button
                                     type="submit"
                                     className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
                                 >
-                                    Add Service
+                                    Xizmat qoʼshish
                                 </button>
                             </div>
                         </form>

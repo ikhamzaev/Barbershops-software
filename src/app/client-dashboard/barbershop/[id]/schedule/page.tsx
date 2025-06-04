@@ -113,6 +113,8 @@ export default function SchedulePage({ params }: PageProps) {
             if (!barberId || selectedServices.length === 0 || !selectedDate) return;
             setIsLoading(true);
             const dayOfWeek = getDayOfWeek(selectedDate);
+            // Debug: Log selected date and barberId
+            console.log('fetchSlots: Selected date:', selectedDate, 'Barber ID:', barberId);
             // Fetch barber availability for this day
             const { data: availData, error: availError } = await supabase
                 .from("barber_availability")
@@ -126,12 +128,18 @@ export default function SchedulePage({ params }: PageProps) {
                 return;
             }
             // Fetch appointments for this barber and date
-            const dateStr = selectedDate.toISOString().split("T")[0];
+            const dateStr = [
+                selectedDate.getFullYear(),
+                String(selectedDate.getMonth() + 1).padStart(2, '0'),
+                String(selectedDate.getDate()).padStart(2, '0')
+            ].join('-');
             const { data: apptData, error: apptError } = await supabase
                 .from("appointments")
                 .select("*")
                 .eq("barber_id", barberId)
                 .eq("appointment_date", dateStr);
+            // Debug: Log fetched appointments
+            console.log('fetchSlots: Fetched appointments for', dateStr, apptData);
             if (apptError) {
                 toast.error("Could not fetch appointments");
                 setIsLoading(false);
@@ -140,22 +148,74 @@ export default function SchedulePage({ params }: PageProps) {
             // Determine working hours (default 09:00-20:00 if not set)
             const startTime = availData?.start_time || "09:00";
             const endTime = availData?.end_time || "20:00";
-            const interval = Math.max(getTotalDuration(selectedServices), 1); // at least 1 min
+            // Calculate total duration for selected services
+            const interval = Math.max(getTotalDuration(selectedServices), 1); // in minutes
+            // Generate slots at intervals equal to the selected service duration
             const slots = generateSlots(startTime, endTime, interval);
+            // Debug: Log generated slots
+            console.log('fetchSlots: Generated slots:', slots);
             // Build slot objects and filter out those that overlap with existing appointments
             const slotObjs: TimeSlot[] = slots.map((slotStart) => {
                 const [h, m] = slotStart.split(":").map(Number);
                 const slotStartDate = new Date(selectedDate);
                 slotStartDate.setHours(h, m, 0, 0);
                 const slotEndDate = new Date(slotStartDate.getTime() + interval * 60000);
-                // Check for overlap with existing appointments
+                // Robust overlap check for all appointments
                 const overlaps = apptData.some((appt: any) => {
-                    const apptStart = new Date(`${dateStr}T${appt.appointment_time}`);
-                    const apptEnd = new Date(apptStart.getTime() + (appt.services?.[0]?.duration || 60) * 60000);
-                    return (
-                        (slotStartDate < apptEnd && slotEndDate > apptStart)
+                    // Only consider appointments for the selected date
+                    const apptDateStr = appt.appointment_date;
+                    const selectedDateStr = [
+                        selectedDate.getFullYear(),
+                        String(selectedDate.getMonth() + 1).padStart(2, '0'),
+                        String(selectedDate.getDate()).padStart(2, '0')
+                    ].join('-');
+                    if (apptDateStr !== selectedDateStr) return false;
+
+                    // Parse appointment start time in local time
+                    const [apptHour, apptMinute] = appt.appointment_time.split(':');
+                    const apptStart = new Date(selectedDate);
+                    apptStart.setHours(parseInt(apptHour), parseInt(apptMinute), 0, 0);
+
+                    // Calculate appointment duration robustly
+                    let apptDuration = 60; // default duration
+                    let apptServices = appt.services;
+
+                    // Always try to parse services as JSON if it's a string
+                    if (typeof apptServices === 'string') {
+                        try {
+                            apptServices = JSON.parse(apptServices);
+                        } catch (e) {
+                            apptServices = null;
+                        }
+                    }
+
+                    if (Array.isArray(apptServices) && apptServices.length > 0) {
+                        apptDuration = apptServices.reduce((sum: number, s: any) => {
+                            if (typeof s === 'object' && s.duration) return sum + s.duration;
+                            if (typeof s === 'number') return sum + s;
+                            return sum;
+                        }, 0);
+                    } else if (apptServices && typeof apptServices === 'object' && apptServices.duration) {
+                        apptDuration = apptServices.duration;
+                    }
+
+                    if (typeof apptDuration !== 'number' || isNaN(apptDuration)) apptDuration = 60;
+
+                    const apptEnd = new Date(apptStart.getTime() + apptDuration * 60000);
+
+                    // Debug logging
+                    console.log('[OverlapCheck]',
+                        'slot:', slotStartDate.toISOString(), '-', slotEndDate.toISOString(),
+                        '| appt:', apptStart.toISOString(), '-', apptEnd.toISOString(),
+                        '| duration:', apptDuration,
+                        '| services:', apptServices,
+                        '| apptId:', appt.id,
+                        '| overlaps:', slotStartDate < apptEnd && slotEndDate > apptStart
                     );
+
+                    return slotStartDate < apptEnd && slotEndDate > apptStart;
                 });
+
                 return {
                     start_time: slotStartDate.toISOString(),
                     end_time: slotEndDate.toISOString(),
@@ -166,6 +226,44 @@ export default function SchedulePage({ params }: PageProps) {
             setIsLoading(false);
         }
         fetchSlots();
+
+        // Subscribe to real-time updates for appointments
+        if (barberId && selectedDate) {
+            const dateStr = [
+                selectedDate.getFullYear(),
+                String(selectedDate.getMonth() + 1).padStart(2, '0'),
+                String(selectedDate.getDate()).padStart(2, '0')
+            ].join('-');
+            console.log('Setting up real-time subscription for:', { barberId, dateStr });
+            const channel = supabase
+                .channel('appointments')
+                .on(
+                    'postgres_changes',
+                    {
+                        event: '*',
+                        schema: 'public',
+                        table: 'appointments',
+                        filter: `barber_id=eq.${barberId}`
+                    },
+                    (payload) => {
+                        console.log('Real-time update received:', payload);
+                        // Only refetch if the appointment is for the selected date
+                        const appointment = payload.new as any;
+                        if (appointment.appointment_date === dateStr) {
+                            console.log('Refetching slots due to appointment change:', appointment);
+                            fetchSlots();
+                        }
+                    }
+                )
+                .subscribe((status) => {
+                    console.log('Subscription status:', status);
+                });
+
+            return () => {
+                console.log('Cleaning up real-time subscription');
+                supabase.removeChannel(channel);
+            };
+        }
     }, [barberId, selectedDate, selectedServices]);
 
     // Helper to check if a slot is in the future (for today)
