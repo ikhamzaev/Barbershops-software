@@ -8,6 +8,8 @@ import CitySelector from "@/components/CitySelector";
 import { CityId } from "@/lib/constants";
 import LocationSelector from '@/components/LocationSelector';
 import { getAppointmentsByClient } from '@/lib/booking';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/lib/AuthContext';
 
 const services = [
     { name: "Soch olish", img: "/images/service-haircut.jpg" },
@@ -17,13 +19,20 @@ const services = [
     { name: "Dizayn", img: "/images/service-design.jpg" },
 ];
 
+interface UserProfile {
+    id: string;
+    name: string;
+    email: string;
+    avatar_url?: string;
+    role: string;
+}
+
 export default function ClientDashboard() {
+    const { user, loading: authLoading } = useAuth();
+    const router = useRouter();
     const [barbershops, setBarbershops] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [favorites, setFavorites] = useState<{ [id: string]: boolean }>({});
-    const [user, setUser] = useState<any>(null);
-    const [userProfile, setUserProfile] = useState<any>(null);
     const [loadingUser, setLoadingUser] = useState(true);
+    const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
     const [selectedCity, setSelectedCity] = useState<CityId | null>(null);
     const [recentVisit, setRecentVisit] = useState<any>(null);
     const [favoriteBarbershopIds, setFavoriteBarbershopIds] = useState<string[]>([]);
@@ -31,8 +40,20 @@ export default function ClientDashboard() {
     const [upcomingAppointments, setUpcomingAppointments] = useState<any[]>([]);
 
     useEffect(() => {
+        if (!authLoading && !user) {
+            router.push('/client-auth');
+        }
+    }, [user, authLoading, router]);
+
+    useEffect(() => {
+        if (user) {
+            fetchUserProfile();
+        }
+    }, [user]);
+
+    useEffect(() => {
         async function fetchBarbershops() {
-            setLoading(true);
+            setLoadingUser(true);
             let query = supabase.from('barbershops').select('*');
             if (selectedCity) {
                 query = query.eq('city', selectedCity);
@@ -41,37 +62,30 @@ export default function ClientDashboard() {
             if (!error && data) {
                 setBarbershops(data);
             }
-            setLoading(false);
+            setLoadingUser(false);
         }
         fetchBarbershops();
     }, [selectedCity]);
 
-    useEffect(() => {
-        async function fetchUser() {
-            setLoadingUser(true);
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) {
-                setLoadingUser(false);
-                console.log('No user found in supabase.auth.getUser()'); // Debug log
-                return;
-            }
-            setUser(user);
-            const { data } = await supabase
+    const fetchUserProfile = async () => {
+        try {
+            const { data, error } = await supabase
                 .from('users')
-                .select('name, city_id')
-                .eq('id', user.id)
+                .select('*')
+                .eq('id', user?.id)
                 .single();
-            if (data) {
-                setUserProfile(data);
-                console.log('User profile set in dashboard:', data); // Debug log
-                if (data.city_id) {
-                    setSelectedCity(data.city_id as CityId);
-                }
+
+            if (error) throw error;
+            setUserProfile(data);
+            if (data.city_id) {
+                setSelectedCity(data.city_id as CityId);
             }
+        } catch (error) {
+            console.error('Error fetching user profile:', error);
+        } finally {
             setLoadingUser(false);
         }
-        fetchUser();
-    }, []);
+    };
 
     useEffect(() => {
         async function fetchFavorites() {
@@ -222,6 +236,18 @@ export default function ClientDashboard() {
         }
     };
 
+    if (authLoading || loadingUser) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="text-gray-600">Loading...</div>
+            </div>
+        );
+    }
+
+    if (!user || !userProfile) {
+        return null; // Will redirect in useEffect
+    }
+
     return (
         <div className="min-h-screen bg-white flex flex-col pb-20">
             {/* Centered main content container */}
@@ -236,17 +262,17 @@ export default function ClientDashboard() {
                                 className="w-64"
                             />
                             <div className="flex items-center space-x-2">
-                                <span className="text-gray-700 text-lg font-semibold">{user?.name}</span>
-                                {user?.avatar_url ? (
+                                <span className="text-gray-700 text-lg font-semibold">{userProfile.name}</span>
+                                {userProfile.avatar_url ? (
                                     <img
-                                        src={user.avatar_url}
-                                        alt={user.name || 'User'}
+                                        src={userProfile.avatar_url}
+                                        alt={userProfile.name || 'User'}
                                         className="w-10 h-10 rounded-full border-2 border-purple-500"
                                     />
                                 ) : (
                                     <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
                                         <span className="text-gray-500 text-lg font-semibold">
-                                            {user?.name?.charAt(0).toUpperCase()}
+                                            {userProfile.name?.charAt(0).toUpperCase()}
                                         </span>
                                     </div>
                                 )}
@@ -368,7 +394,7 @@ export default function ClientDashboard() {
                             <div className="text-gray-900 font-semibold text-lg">Yaqin atrofdagi sartaroshxonalar</div>
                             <button className="text-purple-600 text-sm font-medium hover:underline">Hammasi</button>
                         </div>
-                        {loading ? (
+                        {loadingUser ? (
                             <div className="text-gray-400 text-center py-8">Yuklanmoqda...</div>
                         ) : (
                             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">

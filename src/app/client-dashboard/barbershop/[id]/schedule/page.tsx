@@ -162,6 +162,7 @@ export default function SchedulePage({ params }: PageProps) {
                 const slotEndDate = new Date(slotStartDate.getTime() + interval * 60000);
                 // Robust overlap check for all appointments
                 const overlaps = apptData.some((appt: any) => {
+                    if (appt.status === 'cancelled') return false;
                     // Only consider appointments for the selected date
                     const apptDateStr = appt.appointment_date;
                     const selectedDateStr = [
@@ -399,13 +400,13 @@ export default function SchedulePage({ params }: PageProps) {
                                 <div className="font-semibold mt-2">Services:</div>
                                 <ul className="list-disc ml-6">
                                     {selectedServices.map(s => (
-                                        <li key={s.id}>{s.name} ({s.duration} min, {s.price.toLocaleString()} so‘m)</li>
+                                        <li key={s.id}>{s.name} ({s.duration} min, {s.price.toLocaleString()} so'm)</li>
                                     ))}
                                 </ul>
                                 <div className="font-semibold mt-2">Total Duration:</div>
                                 <div>{getTotalDuration(selectedServices)} minut</div>
                                 <div className="font-semibold mt-2">Total Price:</div>
-                                <div>{selectedServices.reduce((sum, s) => sum + s.price, 0).toLocaleString()} so‘m</div>
+                                <div>{selectedServices.reduce((sum, s) => sum + s.price, 0).toLocaleString()} so'm</div>
                             </div>
                             <button
                                 className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-lg font-semibold transition mb-2"

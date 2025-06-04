@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/lib/AuthContext';
 import { FaCalendarAlt, FaClock, FaUser, FaSignOutAlt, FaUsers, FaUserCircle } from 'react-icons/fa';
 import { supabase } from '@/lib/supabaseClient';
 import BarberProfileCard from '@/components/barber/BarberProfileCard';
@@ -34,30 +35,28 @@ interface Barber {
     id: string;
     name: string;
     email: string;
-    barbershop: {
-        id: string;
-        name: string;
-        city: string;
-        logo_url: string;
-    };
+    barbershop_id: string;
+    user_id: string;
 }
 
-function BarberDashboard() {
+export default function BarberDashboard() {
+    const { user, loading: authLoading } = useAuth();
+    const router = useRouter();
     const [barber, setBarber] = useState<Barber | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const router = useRouter();
+
+    useEffect(() => {
+        if (!authLoading && !user) {
+            router.push('/barber-auth');
+        }
+    }, [user, authLoading, router]);
 
     useEffect(() => {
         const fetchBarberData = async () => {
-            try {
-                const { data: { user } } = await supabase.auth.getUser();
-                if (!user) {
-                    router.push('/barber-auth');
-                    return;
-                }
+            if (!user) return;
 
-                // Fetch barber data
+            try {
                 const { data: barberData, error: barberError } = await supabase
                     .from('barbers')
                     .select('*')
@@ -77,19 +76,24 @@ function BarberDashboard() {
                 setLoading(false);
             }
         };
-        fetchBarberData();
-    }, [router, supabase]);
+
+        if (user) {
+            fetchBarberData();
+        }
+    }, [user]);
 
     useEffect(() => {
-        router.replace('/barber-dashboard/calendar');
-    }, [router]);
+        if (barber) {
+            router.replace('/barber-dashboard/calendar');
+        }
+    }, [barber, router]);
 
     const handleSignOut = async () => {
         await supabase.auth.signOut();
         router.push('/barber-auth');
     };
 
-    if (loading) {
+    if (authLoading || loading) {
         return (
             <div className="min-h-screen bg-gray-900 flex items-center justify-center">
                 <div className="text-white text-xl">Loading...</div>
@@ -141,6 +145,4 @@ function BarberDashboard() {
             </div>
         </div>
     );
-}
-
-export default BarberDashboard; 
+} 

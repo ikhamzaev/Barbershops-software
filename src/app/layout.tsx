@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Playfair_Display, Roboto } from 'next/font/google'
 import './globals.css'
+import ClientLayout from '@/components/ClientLayout'
 
 const playfair = Playfair_Display({ subsets: ['latin'], variable: '--font-display' })
 const roboto = Roboto({
@@ -22,21 +23,23 @@ export default function RootLayout({
     return (
         <html lang="en">
             <body className={`${playfair.variable} ${roboto.variable} font-body bg-barber-cream`}>
-                <div className="min-h-screen flex flex-col">
-                    <header className="bg-barber-dark text-barber-gold py-4">
-                        <div className="container mx-auto px-4">
-                            <h1 className="font-display text-3xl text-center">Uzbek Barbers</h1>
-                        </div>
-                    </header>
-                    <main className="flex-grow">
-                        {children}
-                    </main>
-                    <footer className="bg-barber-dark text-barber-gold py-4">
-                        <div className="container mx-auto px-4 text-center">
-                            <p className="font-display">© 2024 Uzbek Barbers. All rights reserved.</p>
-                        </div>
-                    </footer>
-                </div>
+                <ClientLayout>
+                    <div className="min-h-screen flex flex-col">
+                        <header className="bg-barber-dark text-barber-gold py-4">
+                            <div className="container mx-auto px-4">
+                                <h1 className="font-display text-3xl text-center">Uzbek Barbers</h1>
+                            </div>
+                        </header>
+                        <main className="flex-grow">
+                            {children}
+                        </main>
+                        <footer className="bg-barber-dark text-barber-gold py-4">
+                            <div className="container mx-auto px-4 text-center">
+                                <p className="font-display">© 2024 Uzbek Barbers. All rights reserved.</p>
+                            </div>
+                        </footer>
+                    </div>
+                </ClientLayout>
             </body>
         </html>
     )
